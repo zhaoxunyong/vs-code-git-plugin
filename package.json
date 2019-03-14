@@ -3,8 +3,8 @@
 	"displayName": "zerofinance-git",
 	"description": "zerofinance-git",
 	"version": "1.0.3",
-  "publisher": "zerofinance-git",
-  "repository": "https://github.com/zhaoxunyong/vs-code-git-plugin",
+	"publisher": "zerofinance-git",
+	"repository": "https://github.com/zhaoxunyong/vs-code-git-plugin",
 	"engines": {
 		"vscode": "^1.30.0"
 	},
@@ -46,7 +46,6 @@
 				"command": "extension.newBranch",
 				"title": "Zerofinance Git: New Branch"
 			},
-
 			{
 				"command": "extension.newRelease",
 				"title": "Zerofinance Git: New Release"
