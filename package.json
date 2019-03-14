@@ -1,7 +1,12 @@
 {
-  "name": "AwesomeProject",
-  "version": "0.0.1",
+  "name": "zerofinance-git",
+  "version": "1.0.0",
   "private": true,
+  "publisher": "zerofinance-git",
+  "repository": "https://github.com/zhaoxunyong/vs-code-git-plugin",
+  "engines": {
+    "vscode": "^1.32.0"
+  },
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "test": "jest"

@@ -4,6 +4,10 @@
 // https://www.jianshu.com/p/2b096d8ad9b8
 // https://github.com/Microsoft/vscode-extension-samples
 // https://www.jianshu.com/p/520c575e91c3
+// https://segmentfault.com/a/1190000017279102
+// https://segmentfault.com/a/1190000014758981
+// https://dev.azure.com/it0815/_usersSettings/tokens
+// teh2foynynfdqzxhwe3xqchgkno42yz7h4ergheqhjushrnqtfnq
 
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
