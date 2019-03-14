@@ -1,28 +1,70 @@
 {
-  "name": "zerofinance-git",
-  "version": "1.0.0",
-  "private": true,
+	"name": "zerofinance-git",
+	"displayName": "zerofinance-git",
+	"description": "zerofinance-git",
+	"version": "1.0.3",
   "publisher": "zerofinance-git",
   "repository": "https://github.com/zhaoxunyong/vs-code-git-plugin",
-  "engines": {
-    "vscode": "^1.32.0"
-  },
-  "scripts": {
-    "start": "node node_modules/react-native/local-cli/cli.js start",
-    "test": "jest"
-  },
-  "dependencies": {
-    "react": "16.6.3",
-    "react-native": "0.58.4"
-  },
-  "devDependencies": {
-    "babel-core": "^7.0.0-bridge.0",
-    "babel-jest": "24.1.0",
-    "jest": "24.1.0",
-    "metro-react-native-babel-preset": "0.51.1",
-    "react-test-renderer": "16.6.3"
-  },
-  "jest": {
-    "preset": "react-native"
-  }
+	"engines": {
+		"vscode": "^1.30.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onCommand:extension.newBranch",
+		"onCommand:extension.newRelease"
+	],
+	"main": "./src/extension.js",
+	"contributes": {
+		"menus": {
+			"editor/context": [
+				{
+					"when": "editorFocus",
+					"command": "extension.newBranch",
+					"group": "navigation"
+				},
+				{
+					"when": "editorFocus",
+					"command": "extension.newRelease",
+					"group": "navigation"
+				}
+			],
+			"explorer/context": [
+				{
+					"command": "extension.newBranch",
+					"group": "navigation"
+				},
+				{
+					"command": "extension.newRelease",
+					"group": "navigation"
+				}
+			]
+		},
+		"commands": [
+			{
+				"command": "extension.newBranch",
+				"title": "Zerofinance Git: New Branch"
+			},
+
+			{
+				"command": "extension.newRelease",
+				"title": "Zerofinance Git: New Release"
+			}
+		]
+	},
+	"scripts": {
+		"postinstall": "node ./node_modules/vscode/bin/install",
+		"test": "node ./node_modules/vscode/bin/test"
+	},
+	"devDependencies": {
+		"typescript": "^3.3.1",
+		"vscode": "^1.1.28",
+		"eslint": "^5.13.0",
+		"@types/node": "^10.12.21",
+		"@types/mocha": "^2.2.42"
+	},
+	"dependencies": {
+		"simple-git": "^1.107.0"
+	}
 }

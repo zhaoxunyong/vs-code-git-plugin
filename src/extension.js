@@ -8,6 +8,7 @@
 // https://segmentfault.com/a/1190000014758981
 // https://dev.azure.com/it0815/_usersSettings/tokens
 // teh2foynynfdqzxhwe3xqchgkno42yz7h4ergheqhjushrnqtfnq
+// https://www.cnblogs.com/liuxianan/p/vscode-plugin-publish.html
 
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
@@ -15,7 +16,7 @@ const vscode = require('vscode');
 // const {chooicingFolder, chooicingBranch} = require("./MyPlugin");
 const myPlugin = require("./MyPlugin");
 const simpleGit = require('simple-git')
-let mdTml = vscode.window.createTerminal("MyOpen");
+let mdTml = vscode.window.createTerminal("zerofinance");
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
