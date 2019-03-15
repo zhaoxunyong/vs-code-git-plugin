@@ -30,8 +30,8 @@ function activate(context) {
 			// console.log("selectedItem=>"+selectedItem.name+"/"+selectedItem.uri);
 			myPlugin.chooicingBranch(simpleGit(selectedItem.uri.path)).then(newBranch => {
 				// vscode.window.showInformationMessage(newBranch);
-				let cmdStr = `bash ./newBranch.sh ${newBranch}`;
-				mdTml.show(false);
+				let cmdStr = `cd ${selectedItem.uri.path} && bash ./newBranch.sh ${newBranch}`;
+				mdTml.show(true);
 				mdTml.sendText(cmdStr);
 			});
 		});
@@ -44,8 +44,8 @@ function activate(context) {
 		myPlugin.chooicingFolder().then(selectedItem => {
 			// console.log("selectedItem=>"+selectedItem.name+"/"+selectedItem.uri);
 			myPlugin.chooicingRlease(simpleGit(selectedItem.uri.path)).then(release => {
-				let cmdStr = `bash ./release.sh ${release.nextRelase} ${release.currentDate}`;
-				mdTml.show(false);
+				let cmdStr = `cd ${selectedItem.uri.path} && bash ./release.sh ${release.nextRelase} ${release.currentDate}`;
+				mdTml.show(true);
 				mdTml.sendText(cmdStr);
 			});
 		});
