@@ -57,14 +57,16 @@ async function newBranch() {
 	fs.exists(newBranchPath, async function(isExist) {
 		console.log("isExist----->"+isExist);
 		if(!isExist) {
+			vscode.window.showInformationMessage(`${newBranchFile} is donwloading...`)
 			await downloadScripts(newBranchUrl, newBranchPath).catch(err => {
 				vscode.window.showErrorMessage(`Can't found ${newBranchUrl}`);
 			});
+			vscode.window.showInformationMessage(`${newBranchFile} downloaded in ${newBranchPath}.`)
 		}
-		console.log('newBranchPath======>'+newBranchPath);
+		// console.log('newBranchPath======>'+newBranchPath);
 		try {
 			let cmdStr = `cd ${selectedItem.uri.path} && bash ${newBranchPath} ${newBranch}`;
-			console.log('cmdStr======>'+cmdStr);
+			// console.log('cmdStr======>'+cmdStr);
 			getTerminal().sendText(cmdStr);
 		} catch (err) {
 			vscode.window.showErrorMessage(err);
@@ -81,16 +83,18 @@ async function newRelease() {
 	let tmpdir = tmp.tmpdir;
 	let newReleasePath = tmpdir+'/'+newReleaseFile;
 	fs.exists(newReleasePath, async function(isExist) {
-		console.log("isExist----->"+isExist);
+		// console.log("isExist----->"+isExist);
 		if(!isExist) {
 			await downloadScripts(newReleaseUrl, newReleasePath).catch(err => {
+				vscode.window.showInformationMessage(`${newReleaseFile} is donwloading...`)
 				vscode.window.showErrorMessage(`Can't found ${newReleaseUrl}`);
+				vscode.window.showInformationMessage(`${newReleaseFile} downloaded in ${newReleasePath}.`)
 			});
 		}
 		try {
-			console.log('newReleasePath======>'+newReleasePath);
+			// console.log('newReleasePath======>'+newReleasePath);
 			let cmdStr = `cd ${selectedItem.uri.path} && bash ${newReleasePath} ${release.nextRelase} ${release.currentDate}`;
-			console.log('cmdStr======>'+cmdStr);
+			// console.log('cmdStr======>'+cmdStr);
 			getTerminal().sendText(cmdStr);
 		} catch (err) {
 			vscode.window.showErrorMessage(err);
