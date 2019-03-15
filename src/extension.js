@@ -57,7 +57,7 @@ async function newBranch() {
 	fs.exists(newBranchPath, async function(isExist) {
 		console.log("isExist----->"+isExist);
 		if(!isExist) {
-			vscode.window.showInformationMessage(`${newBranchFile} is donwloading...`)
+			vscode.window.showInformationMessage(`${newBranchFile} is downloading...`)
 			await downloadScripts(newBranchUrl, newBranchPath).catch(err => {
 				vscode.window.showErrorMessage(`Can't found ${newBranchUrl}`);
 			});
@@ -85,7 +85,7 @@ async function newRelease() {
 	fs.exists(newReleasePath, async function(isExist) {
 		// console.log("isExist----->"+isExist);
 		if(!isExist) {
-			vscode.window.showInformationMessage(`${newReleaseFile} is donwloading...`)
+			vscode.window.showInformationMessage(`${newReleaseFile} is downloading...`)
 			await downloadScripts(newReleaseUrl, newReleasePath).catch(err => {
 				vscode.window.showErrorMessage(`Can't found ${newReleaseUrl}`);
 			});
