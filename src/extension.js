@@ -66,15 +66,15 @@ async function newBranch() {
 	let selectedItem = await myPlugin.chooicingFolder();
 	let newBranch = await myPlugin.chooicingBranch(simpleGit(selectedItem.uri.path));
 	// vscode.window.showInformationMessage(newBranch);
-	let newBranchFile = "newBranchx.sh";
+	let newBranchFile = "newBranch.sh";
 	let newBranchUrl = "https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/newBranch.sh";
 	let tmpdir = tmp.tmpdir;
-	let newBranchPath = tmpdir+'/'+newBranchFile;
+	let newBranchPath = selectedItem.uri.path+'/'+newBranchFile;
 	fs.exists(newBranchPath, async function(isExist) {
 		console.log("isExist----->"+isExist);
 		await downloadScripts(newBranchUrl, newBranchPath);
 		console.log('newBranchPath======>'+newBranchPath);
-		let cmdStr = `bash ${newBranchPath} ${newBranch}`;
+		let cmdStr = `cd ${selectedItem.uri.path} && bash ./newBranch.sh ${newBranch}`;
 		console.log('cmdStr======>'+cmdStr);
 		getTerminal(selectedItem.uri.path).sendText(cmdStr);
 	});
