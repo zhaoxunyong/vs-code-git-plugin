@@ -9,6 +9,7 @@
 // https://dev.azure.com/it0815/_usersSettings/tokens
 // teh2foynynfdqzxhwe3xqchgkno42yz7h4ergheqhjushrnqtfnq
 // https://www.cnblogs.com/liuxianan/p/vscode-plugin-publish.html
+// https://www.cnblogs.com/virde/p/vscode-extension-input-and-output.html
 
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
@@ -28,13 +29,23 @@ let mdTml = null;
  */
 function activate(context) {
 	let disposable = vscode.commands.registerCommand('extension.newBranch', function () {
-		newBranch();
+		vscode.window.showInformationMessage("Ensure the code has been submitted, otherwise maybe failed. Are you sure?",'YES','NO')
+        .then(function(select){
+					if(select === 'YES') {
+						newBranch();
+					}
+        });
 	});
 	context.subscriptions.push(disposable);
 	
 
 	context.subscriptions.push(vscode.commands.registerCommand('extension.newRelease', () => {
-		newRelease();
+		vscode.window.showInformationMessage("Ensure the code has been submitted, otherwise maybe failed. Are you sure?",'YES','NO')
+        .then(function(select){
+					if(select === 'YES') {
+						newRelease();
+					}
+        });
 	}));
 	vscode.window.onDidCloseTerminal((terminal) => {
 		console.log(`onDidCloseTerminal, name: ${terminal.name}`);
@@ -65,7 +76,7 @@ async function newBranch() {
 		}
 		// console.log('newBranchPath======>'+newBranchPath);
 		try {
-			let cmdStr = `cd ${selectedItem.uri.path} && bash ${newBranchPath} ${newBranch}`;
+			let cmdStr = `cd "${selectedItem.uri.path}" && bash ${newBranchPath} ${newBranch}`;
 			// console.log('cmdStr======>'+cmdStr);
 			getTerminal().sendText(cmdStr);
 		} catch (err) {
@@ -93,7 +104,7 @@ async function newRelease() {
 		}
 		try {
 			// console.log('newReleasePath======>'+newReleasePath);
-			let cmdStr = `cd ${selectedItem.uri.path} && bash ${newReleasePath} ${release.nextRelase} ${release.currentDate}`;
+			let cmdStr = `cd "${selectedItem.uri.path}" && bash ${newReleasePath} ${release.nextRelase} ${release.currentDate}`;
 			// console.log('cmdStr======>'+cmdStr);
 			getTerminal().sendText(cmdStr);
 		} catch (err) {

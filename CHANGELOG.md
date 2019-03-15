@@ -1,4 +1,4 @@
-# Change Log
+# Change Log 
 
 All notable changes to the "my-first-plugin" extension will be documented in this file.
 
