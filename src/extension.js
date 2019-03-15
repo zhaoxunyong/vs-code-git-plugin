@@ -85,11 +85,11 @@ async function newRelease() {
 	fs.exists(newReleasePath, async function(isExist) {
 		// console.log("isExist----->"+isExist);
 		if(!isExist) {
+			vscode.window.showInformationMessage(`${newReleaseFile} is donwloading...`)
 			await downloadScripts(newReleaseUrl, newReleasePath).catch(err => {
-				vscode.window.showInformationMessage(`${newReleaseFile} is donwloading...`)
 				vscode.window.showErrorMessage(`Can't found ${newReleaseUrl}`);
-				vscode.window.showInformationMessage(`${newReleaseFile} downloaded in ${newReleasePath}.`)
 			});
+			vscode.window.showInformationMessage(`${newReleaseFile} downloaded in ${newReleasePath}.`)
 		}
 		try {
 			// console.log('newReleasePath======>'+newReleasePath);
