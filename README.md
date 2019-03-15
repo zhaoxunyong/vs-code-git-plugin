@@ -6,6 +6,7 @@ The zerofinance-git, Visual Studio Code. Learn more at https://github.com/zhaoxu
 
 ```bash
 npm i vsce -g
+npm install
 vsce login zerofinance-git
 #vsce package
 vsce publish
