@@ -83,7 +83,7 @@ async function newBranch() {
 
 function getTerminal(path) {
 	if(mdTml == null) {
-		mdTml = vscode.window.createTerminal("zerofinance", path);
+		mdTml = vscode.window.createTerminal("zerofinance");
 	}
 	mdTml.show(true);
 	return mdTml;
