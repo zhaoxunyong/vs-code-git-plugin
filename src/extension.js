@@ -55,7 +55,7 @@ async function newBranch() {
 	let tmpdir = tmp.tmpdir;
 	let newBranchPath = tmpdir+'/'+newBranchFile;
 	fs.exists(newBranchPath, async function(isExist) {
-		console.log("isExist----->"+isExist);
+		// console.log("isExist----->"+isExist);
 		if(!isExist) {
 			vscode.window.showInformationMessage(`${newBranchFile} is downloading...`)
 			await downloadScripts(newBranchUrl, newBranchPath).catch(err => {
