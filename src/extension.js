@@ -69,19 +69,21 @@ async function newBranch() {
 	let newBranchFile = "newBranch.sh";
 	let newBranchUrl = "https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/newBranch.sh";
 	let tmpdir = tmp.tmpdir;
-	let newBranchPath = selectedItem.uri.path+'/'+newBranchFile;
+	let newBranchPath = tmpdir+'/'+newBranchFile;
 	fs.exists(newBranchPath, async function(isExist) {
 		console.log("isExist----->"+isExist);
-		await downloadScripts(newBranchUrl, newBranchPath);
+		if(!isExist) {
+			await downloadScripts(newBranchUrl, newBranchPath);
+		}
 		console.log('newBranchPath======>'+newBranchPath);
-		let cmdStr = `cd ${selectedItem.uri.path} && bash ./newBranch.sh ${newBranch}`;
+		let cmdStr = `cd ${selectedItem.uri.path} && bash ${newBranchPath} ${newBranch}`;
 		console.log('cmdStr======>'+cmdStr);
-		getTerminal(selectedItem.uri.path).sendText(cmdStr);
+		getTerminal().sendText(cmdStr);
 	});
 		
 }
 
-function getTerminal(path) {
+function getTerminal() {
 	if(mdTml == null) {
 		mdTml = vscode.window.createTerminal("zerofinance");
 	}
