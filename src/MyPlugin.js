@@ -16,17 +16,8 @@ Date.prototype.Format = function (fmt) {
     return fmt;
 }
 
-function chooicingFolder() {
-    return new Promise((resolve, reject) => {
-        vscode.window.showWorkspaceFolderPick().then(selectedItem => {
-            if (selectedItem) {
-                // vscode.window.showInformationMessage(`You have selected ${selectedItem.name}`);
-                resolve(selectedItem);
-            } /* else {
-                reject(new Error('At lease you should chooice a folder!'));
-            } */
-        });
-    });
+async function chooicingFolder() {
+    return await vscode.window.showWorkspaceFolderPick();
 }
 
 function chooicingBranch(simpleGit) {
@@ -55,7 +46,7 @@ function chooicingBranch(simpleGit) {
                         return ''; 
                     } // 对输入内容进行验证并返回
             }).then(function(newBranch){
-                if (!nextRelase) return;
+                if (!newBranch) return;
                 resolve(newBranch);
             });
         });
