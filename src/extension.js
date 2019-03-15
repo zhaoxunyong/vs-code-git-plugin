@@ -34,23 +34,7 @@ function activate(context) {
 	
 
 	context.subscriptions.push(vscode.commands.registerCommand('extension.newRelease', () => {
-		// const terminal = vscode.window.createTerminal(`Ext Terminal #${NEXT_TERM_ID++}`);
-		// terminal.sendText("echo 'Sent text immediately after creating'");
-		/* myPlugin.chooicingFolder().then(selectedItem => {
-			// console.log("selectedItem=>"+selectedItem.name+"/"+selectedItem.uri);
-			myPlugin.chooicingRlease(simpleGit(selectedItem.uri.path)).then(release => {
-				let cmdStr = `bash ./release.sh ${release.nextRelase} ${release.currentDate}`;
-				getTerminal(selectedItem.uri.path).sendText(cmdStr);
-			});
-		}); */
-		myPlugin.chooicingFolder().then(selectedItem => {
-			// console.log("selectedItem=>"+selectedItem.name+"/"+selectedItem.uri);
-			myPlugin.chooicingRlease(simpleGit(selectedItem.uri.path)).then(release => {
-				let cmdStr = `bash ./release.sh ${release.nextRelase} ${release.currentDate}`;
-				getTerminal(selectedItem.uri.path).sendText(cmdStr);
-			});
-		});
-
+		newRelease();
 	}));
 	vscode.window.onDidCloseTerminal((terminal) => {
 		console.log(`onDidCloseTerminal, name: ${terminal.name}`);
@@ -67,20 +51,51 @@ async function newBranch() {
 	let newBranch = await myPlugin.chooicingBranch(simpleGit(selectedItem.uri.path));
 	// vscode.window.showInformationMessage(newBranch);
 	let newBranchFile = "newBranch.sh";
-	let newBranchUrl = "https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/newBranch.sh";
+	let newBranchUrl = "https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/"+newBranchFile;
 	let tmpdir = tmp.tmpdir;
 	let newBranchPath = tmpdir+'/'+newBranchFile;
 	fs.exists(newBranchPath, async function(isExist) {
 		console.log("isExist----->"+isExist);
 		if(!isExist) {
-			await downloadScripts(newBranchUrl, newBranchPath);
+			await downloadScripts(newBranchUrl, newBranchPath).catch(err => {
+				vscode.window.showErrorMessage(`Can't found ${newBranchUrl}`);
+			});
 		}
 		console.log('newBranchPath======>'+newBranchPath);
-		let cmdStr = `cd ${selectedItem.uri.path} && bash ${newBranchPath} ${newBranch}`;
-		console.log('cmdStr======>'+cmdStr);
-		getTerminal().sendText(cmdStr);
+		try {
+			let cmdStr = `cd ${selectedItem.uri.path} && bash ${newBranchPath} ${newBranch}`;
+			console.log('cmdStr======>'+cmdStr);
+			getTerminal().sendText(cmdStr);
+		} catch (err) {
+			vscode.window.showErrorMessage(err);
+		}
 	});
-		
+}
+
+async function newRelease() {
+	let selectedItem = await myPlugin.chooicingFolder();
+	let release = await myPlugin.chooicingRlease(simpleGit(selectedItem.uri.path));
+	// vscode.window.showInformationMessage(newBranch);
+	let newReleaseFile = "release.sh";
+	let newReleaseUrl = "https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/"+newReleaseFile;
+	let tmpdir = tmp.tmpdir;
+	let newReleasePath = tmpdir+'/'+newReleaseFile;
+	fs.exists(newReleasePath, async function(isExist) {
+		console.log("isExist----->"+isExist);
+		if(!isExist) {
+			await downloadScripts(newReleaseUrl, newReleasePath).catch(err => {
+				vscode.window.showErrorMessage(`Can't found ${newReleaseUrl}`);
+			});
+		}
+		try {
+			console.log('newReleasePath======>'+newReleasePath);
+			let cmdStr = `cd ${selectedItem.uri.path} && bash ${newReleasePath} ${release.nextRelase} ${release.currentDate}`;
+			console.log('cmdStr======>'+cmdStr);
+			getTerminal().sendText(cmdStr);
+		} catch (err) {
+			vscode.window.showErrorMessage(err);
+		}
+	});
 }
 
 function getTerminal() {
@@ -100,11 +115,16 @@ function downloadScripts(url, file) {
 		  }).then((response) => {
 			fs.writeFile(file, response.data, err => {
 				if(err) {
-					reject(err);
+					throw err;
 				} else {
 					resolve(file);
 				}
 			});
+		  }).catch(function (error) {
+			// handle error
+			// console.log("error->", error);
+			reject(error);
+			// throw new Error(error);
 		  });
 	});
 }
