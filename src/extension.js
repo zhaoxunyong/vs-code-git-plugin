@@ -16,8 +16,10 @@ const vscode = require('vscode');
 // const {chooicingFolder, chooicingBranch} = require("./MyPlugin");
 const myPlugin = require("./MyPlugin");
 const simpleGit = require('simple-git')
-let mdTml = vscode.window.createTerminal("zerofinance");
-
+const axios = require('axios')
+const tmp = require('tmp');
+var fs = require('fs')
+let mdTml = null;
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 
@@ -26,36 +28,84 @@ let mdTml = vscode.window.createTerminal("zerofinance");
  */
 function activate(context) {
 	let disposable = vscode.commands.registerCommand('extension.newBranch', function () {
-		myPlugin.chooicingFolder().then(selectedItem => {
-			// console.log("selectedItem=>"+selectedItem.name+"/"+selectedItem.uri);
-			myPlugin.chooicingBranch(simpleGit(selectedItem.uri.path)).then(newBranch => {
-				// vscode.window.showInformationMessage(newBranch);
-				let cmdStr = `cd ${selectedItem.uri.path} && bash ./newBranch.sh ${newBranch}`;
-				mdTml.show(true);
-				mdTml.sendText(cmdStr);
-			});
-		});
+		newBranch();
 	});
 	context.subscriptions.push(disposable);
+	
 
 	context.subscriptions.push(vscode.commands.registerCommand('extension.newRelease', () => {
 		// const terminal = vscode.window.createTerminal(`Ext Terminal #${NEXT_TERM_ID++}`);
 		// terminal.sendText("echo 'Sent text immediately after creating'");
+		/* myPlugin.chooicingFolder().then(selectedItem => {
+			// console.log("selectedItem=>"+selectedItem.name+"/"+selectedItem.uri);
+			myPlugin.chooicingRlease(simpleGit(selectedItem.uri.path)).then(release => {
+				let cmdStr = `bash ./release.sh ${release.nextRelase} ${release.currentDate}`;
+				getTerminal(selectedItem.uri.path).sendText(cmdStr);
+			});
+		}); */
 		myPlugin.chooicingFolder().then(selectedItem => {
 			// console.log("selectedItem=>"+selectedItem.name+"/"+selectedItem.uri);
 			myPlugin.chooicingRlease(simpleGit(selectedItem.uri.path)).then(release => {
-				let cmdStr = `cd ${selectedItem.uri.path} && bash ./release.sh ${release.nextRelase} ${release.currentDate}`;
-				mdTml.show(true);
-				mdTml.sendText(cmdStr);
+				let cmdStr = `bash ./release.sh ${release.nextRelase} ${release.currentDate}`;
+				getTerminal(selectedItem.uri.path).sendText(cmdStr);
 			});
 		});
 
 	}));
+	vscode.window.onDidCloseTerminal((terminal) => {
+		console.log(`onDidCloseTerminal, name: ${terminal.name}`);
+		mdTml = null;
+	});
 }
 exports.activate = activate;
 
 // this method is called when your extension is deactivated
 function deactivate() {}
+
+async function newBranch() {
+	let selectedItem = await myPlugin.chooicingFolder();
+	let newBranch = await myPlugin.chooicingBranch(simpleGit(selectedItem.uri.path));
+	// vscode.window.showInformationMessage(newBranch);
+	let newBranchFile = "newBranchx.sh";
+	let newBranchUrl = "https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/newBranch.sh";
+	let tmpdir = tmp.tmpdir;
+	let newBranchPath = tmpdir+'/'+newBranchFile;
+	fs.exists(newBranchPath, async function(isExist) {
+		console.log("isExist----->"+isExist);
+		await downloadScripts(newBranchUrl, newBranchPath);
+		console.log('newBranchPath======>'+newBranchPath);
+		let cmdStr = `bash ${newBranchPath} ${newBranch}`;
+		console.log('cmdStr======>'+cmdStr);
+		getTerminal(selectedItem.uri.path).sendText(cmdStr);
+	});
+		
+}
+
+function getTerminal(path) {
+	if(mdTml == null) {
+		mdTml = vscode.window.createTerminal("zerofinance", path);
+	}
+	mdTml.show(true);
+	return mdTml;
+}
+
+function downloadScripts(url, file) {
+	return new Promise((resolve, reject) => {
+		axios({
+			url: url,
+			method: 'GET',
+			responseType: 'blob', // important
+		  }).then((response) => {
+			fs.writeFile(file, response.data, err => {
+				if(err) {
+					reject(err);
+				} else {
+					resolve(file);
+				}
+			});
+		  });
+	});
+}
 
 module.exports = {
 	activate,

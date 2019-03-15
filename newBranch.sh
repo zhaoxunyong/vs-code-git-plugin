@@ -1,6 +1,7 @@
 #!/bin/sh
 export PATH="/usr/local/bin:/usr/bin:$JAVA_HOME/bin:$MVN_HOME/bin:$PATH"
-
+echo "11111111"
+exit -1
 sedi() {
   case $(uname) in
     Darwin*) sedi=('-i' '') ;;

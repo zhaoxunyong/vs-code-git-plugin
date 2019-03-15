@@ -1,7 +1,6 @@
 #!/bin/sh
 export PATH="/usr/local/bin:/usr/bin:$JAVA_HOME/bin:$MVN_HOME/bin:$PATH"
-echo "11111111"
-exit -1
+
 sedi() {
   case $(uname) in
     Darwin*) sedi=('-i' '') ;;
@@ -25,18 +24,14 @@ if [[ $? != 0 ]]; then
 	exit -1
 fi
 
-branchVersion=$1
-newDate=$2
+NEW_BRANCH=$1
 
-if [[ "$branchVersion" == "" || "$newDate" == "" ]]; then
+if [[ "$NEW_BRANCH" == "" || ($NEW_BRANCH != *.x) ]]; then
   # echo "branchVersion must be not empty!"
-  echo "Usage: $0 BranchVersion newTagDate"
-  echo "$0 1.0.0.release 201802271230"
-  echo "$0 1.0.0.htofix 201802271230"
+  echo "Usage: $0 branch"
+  echo "$0 1.0.x"
   exit -1
 fi
-
-newTag=${branchVersion}-${newDate}
 
 function SwitchBranch() {
     branchVersions=$1
@@ -66,23 +61,6 @@ function Push() {
     echo "Push ${branchVersions} successful."
 }
 
-function Tag() {
-    newTag=$1
-    git tag -a $newTag -m "version ${newTag}"
-    if [[ $? != 0 ]]; then
-      echo "Tag error!"
-      exit -1
-    else
-      echo "Tag to ${newTag} successful!"
-      git push origin ${newTag}
-    fi
-}
-
-currentBranchVersion=`git branch|grep "*"|sed 's;^* ;;'`
-echo "branchVersion--------${branchVersion}"
-echo "newTag--------${newTag}"
-echo "currentBranchVersion--------${currentBranchVersion}"
-SwitchBranch $branchVersion
-Push $branchVersion
-Tag $newTag
-git checkout $currentBranchVersion
+SwitchBranch $NEW_BRANCH
+# bash changeVersion.sh $NEW_VERSION
+Push $NEW_BRANCH
