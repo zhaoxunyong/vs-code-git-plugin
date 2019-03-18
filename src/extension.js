@@ -15,11 +15,12 @@
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
 // const {chooicingFolder, chooicingBranch} = require("./MyPlugin");
-const myPlugin = require("./MyPlugin");
+const myPlugin = require("./myPlugin");
 const simpleGit = require('simple-git')
 const axios = require('axios')
 const tmp = require('tmp');
 var fs = require('fs')
+
 let mdTml = null;
 const newBranchFile = "newBranch.sh";
 const newReleaseFile = "release.sh";
@@ -34,18 +35,18 @@ const newReleasePath = tmpdir+'/'+newReleaseFile;
  */
 function activate(context) {
 	context.subscriptions.push(vscode.commands.registerCommand('extension.newBranch', function () {
-		vscode.window.showInformationMessage("Ensure the code has been submitted, otherwise maybe failed. Are you sure?",'YES','NO')
+		vscode.window.showInformationMessage("Ensure the code has been submitted, otherwise maybe failed. Are you sure?",'Yes','No')
         .then(function(select){
-					if(select === 'YES') {
+					if(select === 'Yes') {
 						newBranch();
 					}
         });
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('extension.newRelease', () => {
-		vscode.window.showInformationMessage("Ensure the code has been submitted, otherwise maybe failed. Are you sure?",'YES','NO')
+		vscode.window.showInformationMessage("Ensure the code has been submitted, otherwise maybe failed. Are you sure?",'Yes','No')
         .then(function(select){
-					if(select === 'YES') {
+					if(select === 'Yes') {
 						newRelease();
 					}
         });
@@ -135,22 +136,22 @@ function getTerminal() {
 function downloadScripts(url, file) {
 	return new Promise((resolve, reject) => {
 		axios({
-			url: url,
-			method: 'GET',
-			responseType: 'blob', // important
+				url: url,
+				method: 'GET',
+				responseType: 'blob', // important
 		  }).then((response) => {
-			fs.writeFile(file, response.data, err => {
-				if(err) {
-					throw err;
-				} else {
-					resolve(file);
-				}
-			});
+				fs.writeFile(file, response.data, err => {
+					if(err) {
+						throw err;
+					} else {
+						resolve(file);
+					}
+				});
 		  }).catch(function (error) {
-			// handle error
-			// console.log("error->", error);
-			reject(error);
-			// throw new Error(error);
+				// handle error
+				// console.log("error->", error);
+				reject(error);
+				// throw new Error(error);
 		  });
 	});
 }
