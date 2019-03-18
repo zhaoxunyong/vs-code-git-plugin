@@ -141,6 +141,9 @@ function downloadScripts(url, file) {
 				url: url,
 				method: 'GET',
 				responseType: 'blob', // important
+				headers: {
+					'Cache-Control': 'no-cache'
+				}
 		  }).then((response) => {
 				fs.writeFile(file, response.data, err => {
 					if(err) {
