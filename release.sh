@@ -1,11 +1,6 @@
 #!/bin/bash
 export PATH="/usr/local/bin:/usr/bin:$JAVA_HOME/bin:$MVN_HOME/bin:$PATH"
 
-git branch --sort=-committerdate|grep release|sed "1,3d"
-
-
-exit -1
-
 sedi() {
   case $(uname) in
     Darwin*) sedi=('-i' '') ;;
