@@ -50,7 +50,7 @@ function SwitchBranch() {
         fi
     fi
     echo "Switch branch to ${branchVersions} successful."
-    git branch
+    # git branch
 }
 
 function Push() {

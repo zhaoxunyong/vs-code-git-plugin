@@ -21,6 +21,11 @@ const axios = require('axios')
 const tmp = require('tmp');
 var fs = require('fs')
 let mdTml = null;
+const newBranchFile = "newBranch.sh";
+const newReleaseFile = "release.sh";
+const tmpdir = tmp.tmpdir;
+const newBranchPath = tmpdir+'/'+newBranchFile;
+const newReleasePath = tmpdir+'/'+newReleaseFile;
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 
@@ -28,16 +33,14 @@ let mdTml = null;
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-	let disposable = vscode.commands.registerCommand('extension.newBranch', function () {
+	context.subscriptions.push(vscode.commands.registerCommand('extension.newBranch', function () {
 		vscode.window.showInformationMessage("Ensure the code has been submitted, otherwise maybe failed. Are you sure?",'YES','NO')
         .then(function(select){
 					if(select === 'YES') {
 						newBranch();
 					}
         });
-	});
-	context.subscriptions.push(disposable);
-	
+	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('extension.newRelease', () => {
 		vscode.window.showInformationMessage("Ensure the code has been submitted, otherwise maybe failed. Are you sure?",'YES','NO')
@@ -47,6 +50,17 @@ function activate(context) {
 					}
         });
 	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand('extension.clearCache', () => {
+		try {
+			fs.unlinkSync(newBranchPath);
+			fs.unlinkSync(newReleasePath);
+		} catch (error) {
+			// do nothing
+		}
+		vscode.window.showInformationMessage("Clear cache sussessfully!");
+	}));
+
 	vscode.window.onDidCloseTerminal((terminal) => {
 		console.log(`onDidCloseTerminal, name: ${terminal.name}`);
 		mdTml = null;
@@ -63,8 +77,7 @@ async function newBranch() {
 	// vscode.window.showInformationMessage(newBranch);
 	let newBranchFile = "newBranch.sh";
 	let newBranchUrl = "https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/"+newBranchFile;
-	let tmpdir = tmp.tmpdir;
-	let newBranchPath = tmpdir+'/'+newBranchFile;
+	
 	fs.exists(newBranchPath, async function(isExist) {
 		// console.log("isExist----->"+isExist);
 		if(!isExist) {
@@ -89,10 +102,8 @@ async function newRelease() {
 	let selectedItem = await myPlugin.chooicingFolder();
 	let release = await myPlugin.chooicingRlease(simpleGit(selectedItem.uri.path));
 	// vscode.window.showInformationMessage(newBranch);
-	let newReleaseFile = "release.sh";
 	let newReleaseUrl = "https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/"+newReleaseFile;
-	let tmpdir = tmp.tmpdir;
-	let newReleasePath = tmpdir+'/'+newReleaseFile;
+	
 	fs.exists(newReleasePath, async function(isExist) {
 		// console.log("isExist----->"+isExist);
 		if(!isExist) {
