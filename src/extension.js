@@ -11,6 +11,7 @@
 // https://www.cnblogs.com/liuxianan/p/vscode-plugin-publish.html
 // https://www.cnblogs.com/virde/p/vscode-extension-input-and-output.html
 // https://www.cnblogs.com/virde/p/vscode-extension-input-and-output.html
+// http://nodejs.cn/api/fs.html#fs_fs_unlinksync_path
 
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
