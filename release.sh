@@ -109,4 +109,4 @@ git checkout $currentBranchVersion
 echo "Deleting those unused release or hotfix branches..."
 deleteUnusedReleaseBranch release
 deleteUnusedReleaseBranch hotfix
-echo "Those unused release or hotfix branches done..."
+echo "Those unused release or hotfix branches have been deleted..."
