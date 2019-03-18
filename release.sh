@@ -1,5 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 export PATH="/usr/local/bin:/usr/bin:$JAVA_HOME/bin:$MVN_HOME/bin:$PATH"
+
+git branch --sort=-committerdate|grep release|sed "1,3d"
+
+
+exit -1
 
 sedi() {
   case $(uname) in
@@ -77,6 +82,25 @@ function Tag() {
     fi
 }
 
+function deleteUnusedReleaseBranch() {
+    type=$1
+    reserveVersionNumber=$2
+    if [[ "${type}" == "" ]]; then
+        type="release"
+    fi
+    if [[ "${reserveVersionNumber}" == "" ]]; then
+        reserveVersionNumber=3
+    fi
+    deleteBranchs=`git branch -a --sort=-committerdate|grep ${type}|grep remotes|sed 's;remotes/origin/;;'|sort -t '.' -r -k 2 -V|sed "1,${reserveVersionNumber}d"`
+    for deleteBranch in $deleteBranchs   
+    do
+        # Keep only the last 3 releases
+        git branch -d $deleteBranch &> /dev/null
+        git push origin --delete $deleteBranch &> /dev/null
+    done
+    echo "Keep only the last 3 ${type} versions!"
+}
+
 currentBranchVersion=`git branch|grep "*"|sed 's;^* ;;'`
 echo "branchVersion--------${branchVersion}"
 echo "newTag--------${newTag}"
@@ -85,3 +109,9 @@ SwitchBranch $branchVersion
 Push $branchVersion
 Tag $newTag
 git checkout $currentBranchVersion
+
+# Keep only the last 3 releases version
+echo "Deleting those unused release or hotfix branches..."
+deleteUnusedReleaseBranch release
+deleteUnusedReleaseBranch hotfix
+echo "Those unused release or hotfix branches done..."
