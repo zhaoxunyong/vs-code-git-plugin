@@ -96,12 +96,19 @@ function deleteUnusedReleaseBranch() {
     echo "Keep only the last 3 ${type} versions!"
 }
 
-function changeVersion() {
+function changeReleaseVersion() {
   #change version
-  NEW_BRANCH=$(echo $branchVersion|sed 's;\.test;;'|sed 's;\.release;;'|sed 's;\.hotfix;;')
-  arr=(${NEW_BRANCH//./ })
-  NEW_VERSION=${arr[0]}.${arr[1]}.$((${arr[2]}+1))-SNAPSHOT
-  mvn versions:set -DnewVersion=${NEW_VERSION}
+  mvnVersion=$(echo $branchVersion|sed 's;\.test;;'|sed 's;\.release;;'|sed 's;\.hotfix;;')
+  mvn versions:set -DnewVersion=${mvnVersion}
+  mvn versions:commit
+}
+
+function changeNextVersion() {
+  #change version
+  mvnVersion=$(echo $branchVersion|sed 's;\.test;;'|sed 's;\.release;;'|sed 's;\.hotfix;;')
+  arr=(${mvnVersion//./ })
+  nextVersion=${arr[0]}.${arr[1]}.$((${arr[2]}+1))-SNAPSHOT
+  mvn versions:set -DnewVersion=${nextVersion}
   mvn versions:commit
 }
 
@@ -110,10 +117,11 @@ echo "branchVersion--------${branchVersion}"
 echo "newTag--------${newTag}"
 echo "currentBranchVersion--------${currentBranchVersion}"
 SwitchBranch $branchVersion
-changeVersion &> /dev/null
+changeReleaseVersion &> /dev/null
 Push $branchVersion
 Tag $newTag
 git checkout $currentBranchVersion
+changeNextVersion &> /dev/null
 
 # Keep only the last 3 releases version
 echo "Deleting those unused release or hotfix branches..."

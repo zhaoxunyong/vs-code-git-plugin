@@ -64,8 +64,8 @@ function Push() {
 function changeVersion() {
   #change version
   arr=(${NEW_BRANCH//./ })
-  NEW_VERSION=${arr[0]}.${arr[1]}.0-SNAPSHOT
-  mvn versions:set -DnewVersion=${NEW_VERSION}
+  mvnVersion=${arr[0]}.${arr[1]}.0-SNAPSHOT
+  mvn versions:set -DnewVersion=${mvnVersion}
   mvn versions:commit
 }
 
