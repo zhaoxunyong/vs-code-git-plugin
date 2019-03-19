@@ -14,7 +14,7 @@ sedi() {
 #cd #{project}
 
 #检查是否已经保存过git的账户与密码
-git ls-remote
+git ls-remote &> /dev/null
 if [[ $? != 0 ]]; then
 	echo "=================Authentication error================="
 	echo "Authentication error. Please execute the following command through git bash, and enter the account and password:"
