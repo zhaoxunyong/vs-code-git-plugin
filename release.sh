@@ -122,6 +122,7 @@ Push $branchVersion
 Tag $newTag
 git checkout $currentBranchVersion
 changeNextVersion &> /dev/null
+Push $currentBranchVersion
 
 # Keep only the last 3 releases version
 echo "Deleting those unused release or hotfix branches..."
