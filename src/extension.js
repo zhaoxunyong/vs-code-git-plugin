@@ -37,7 +37,7 @@ const newReleasePath = tmpdir+'/'+newReleaseFile;
  */
 function activate(context) {
 	context.subscriptions.push(vscode.commands.registerCommand('extension.newBranch', function () {
-		vscode.window.showInformationMessage("Ensure the code has been submitted, otherwise maybe failed. Are you sure?",'Yes','No')
+		vscode.window.showInformationMessage("They'll commit and push codes to remote branch automatically. Are you sure?",'Yes','No')
         .then(function(select){
 					if(select === 'Yes') {
 						newBranch();
@@ -46,7 +46,7 @@ function activate(context) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('extension.newRelease', () => {
-		vscode.window.showInformationMessage("Ensure the code has been submitted, otherwise maybe failed. Are you sure?",'Yes','No')
+		vscode.window.showInformationMessage("They'll commit and push codes to remote branch automatically. Are you sure?",'Yes','No')
         .then(function(select){
 					if(select === 'Yes') {
 						newRelease();
