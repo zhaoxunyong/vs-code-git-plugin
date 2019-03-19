@@ -57,9 +57,12 @@ function activate(context) {
 	context.subscriptions.push(vscode.commands.registerCommand('extension.clearCache', () => {
 		try {
 			fs.unlinkSync(newBranchPath);
+		} catch (error) {
+		}
+		
+		try {
 			fs.unlinkSync(newReleasePath);
 		} catch (error) {
-			// do nothing
 		}
 		vscode.window.showInformationMessage("Clear cache sussessfully!");
 	}));
