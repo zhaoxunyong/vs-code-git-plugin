@@ -110,12 +110,6 @@ function changeNextVersion() {
   nextVersion=${arr[0]}.${arr[1]}.$((${arr[2]}+1))-SNAPSHOT
   mvn versions:set -DnewVersion=${nextVersion}
   mvn versions:commit
-  # deploy
-  cat pom.xml 2>/dev/null | grep "<skip>false</skip>" &> /dev/null
-  if [[ $? == 0 ]]; then
-    mvn clean deploy > /dev/null
-  fi
-
 }
 
 currentBranchVersion=`git branch|grep "*"|sed 's;^* ;;'`
@@ -124,6 +118,12 @@ echo "newTag--------${newTag}"
 echo "currentBranchVersion--------${currentBranchVersion}"
 SwitchBranch $branchVersion
 changeReleaseVersion &> /dev/null
+
+# deploy
+cat pom.xml 2>/dev/null | grep "<skip>false</skip>" &> /dev/null
+if [[ $? == 0 ]]; then
+  mvn clean deploy > /dev/null
+fi
 Push $branchVersion
 Tag $newTag
 git checkout $currentBranchVersion
