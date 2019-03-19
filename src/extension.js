@@ -76,7 +76,7 @@ function deactivate() {}
 
 async function newBranch() {
 	let selectedItem = await myPlugin.chooicingFolder();
-	let newBranch = await myPlugin.chooicingBranch(simpleGit(selectedItem.uri.path));
+	let newBranch = await myPlugin.chooicingBranch(simpleGit(selectedItem.uri.fsPath));
 	// vscode.window.showInformationMessage(newBranch);
 	let newBranchFile = "newBranch.sh";
 	let newBranchUrl = "https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/"+newBranchFile;
@@ -92,7 +92,7 @@ async function newBranch() {
 		}
 		// console.log('newBranchPath======>'+newBranchPath);
 		try {
-			let cmdStr = `cd "${selectedItem.uri.path}" && bash ${newBranchPath} ${newBranch}`;
+			let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newBranchPath}" ${newBranch}`;
 			// console.log('cmdStr======>'+cmdStr);
 			getTerminal().sendText(cmdStr);
 		} catch (err) {
@@ -103,7 +103,7 @@ async function newBranch() {
 
 async function newRelease() {
 	let selectedItem = await myPlugin.chooicingFolder();
-	let release = await myPlugin.chooicingRlease(simpleGit(selectedItem.uri.path));
+	let release = await myPlugin.chooicingRlease(simpleGit(selectedItem.uri.fsPath));
 	// vscode.window.showInformationMessage(newBranch);
 	let newReleaseUrl = "https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/"+newReleaseFile;
 	
@@ -118,7 +118,7 @@ async function newRelease() {
 		}
 		try {
 			// console.log('newReleasePath======>'+newReleasePath);
-			let cmdStr = `cd "${selectedItem.uri.path}" && bash ${newReleasePath} ${release.nextRelase} ${release.currentDate}`;
+			let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newReleasePath}" ${release.nextRelase} ${release.currentDate}`;
 			// console.log('cmdStr======>'+cmdStr);
 			getTerminal().sendText(cmdStr);
 		} catch (err) {

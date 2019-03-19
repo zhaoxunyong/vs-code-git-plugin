@@ -35,8 +35,8 @@ fi
 
 function SwitchBranch() {
     branchVersions=$1
-    # git add .
-    # git commit -m "Commit by new branch:${NEW_BRANCH}."
+    git add .
+    git commit -m "Commit by new branch:${NEW_BRANCH}."
     git checkout -b ${branchVersions} > /dev/null
     if [[ $? != 0 ]]; then
         git checkout ${branchVersions} > /dev/null
@@ -51,8 +51,8 @@ function SwitchBranch() {
 
 function Push() {
     branchVersions=$1
-    # git add .
-    # git commit -m "Mod New branch version to ${branchVersions}"
+    git add .
+    git commit -m "Mod New branch version to ${branchVersions}"
     git push origin ${branchVersions}
     if [[ $? != 0 ]]; then
         echo "Push ${branchVersions} error."
@@ -61,6 +61,14 @@ function Push() {
     echo "Push ${branchVersions} successful."
 }
 
+function changeVersion() {
+  #change version
+  arr=(${NEW_BRANCH//./ })
+  NEW_VERSION=${arr[0]}.${arr[1]}.0-SNAPSHOT
+  mvn versions:set -DnewVersion=${NEW_VERSION}
+  mvn versions:commit
+}
+
 SwitchBranch $NEW_BRANCH
-# bash changeVersion.sh $NEW_VERSION
+changeVersion &> /dev/null
 Push $NEW_BRANCH

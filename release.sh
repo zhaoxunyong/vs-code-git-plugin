@@ -55,8 +55,8 @@ function SwitchBranch() {
 
 function Push() {
     branchVersions=$1
-    # git add .
-    # git commit -m "Mod New branch version to ${branchVersions}"
+    git add .
+    git commit -m "Mod New branch version to ${branchVersions}"
     git push origin ${branchVersions}
     if [[ $? != 0 ]]; then
         echo "Push ${branchVersions} error."
@@ -96,11 +96,21 @@ function deleteUnusedReleaseBranch() {
     echo "Keep only the last 3 ${type} versions!"
 }
 
+function changeVersion() {
+  #change version
+  NEW_BRANCH=$(echo $branchVersion|sed 's;\.test;;'|sed 's;\.release;;'|sed 's;\.hotfix;;')
+  arr=(${NEW_BRANCH//./ })
+  NEW_VERSION=${arr[0]}.${arr[1]}.$((${arr[2]}+1))-SNAPSHOT
+  mvn versions:set -DnewVersion=${NEW_VERSION}
+  mvn versions:commit
+}
+
 currentBranchVersion=`git branch|grep "*"|sed 's;^* ;;'`
 echo "branchVersion--------${branchVersion}"
 echo "newTag--------${newTag}"
 echo "currentBranchVersion--------${currentBranchVersion}"
 SwitchBranch $branchVersion
+changeVersion &> /dev/null
 Push $branchVersion
 Tag $newTag
 git checkout $currentBranchVersion

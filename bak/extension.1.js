@@ -55,7 +55,7 @@ function activate(context) {
 		// });
 		myPlugin.chooicingFolder().then(selectedItem => {
 			console.log("selectedItem=>"+selectedItem.name+"/"+selectedItem.uri);
-			myPlugin.chooicingBranch(simpleGit(selectedItem.uri.path)).then(item => {
+			myPlugin.chooicingBranch(simpleGit(selectedItem.uri.fsPath)).then(item => {
 				/* vscode.commands.getCommands().then(command => {
 					command.forEach(c => {
 						console.log("c--->"+c);
