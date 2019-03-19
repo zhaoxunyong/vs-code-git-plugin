@@ -112,7 +112,7 @@ function changeNextVersion() {
   mvn versions:commit
   # deploy
   cat pom.xml 2>/dev/null | grep "<skip>false</skip>" &> /dev/null
-  if [[ $? != 0 ]]; then
+  if [[ $? == 0 ]]; then
     mvn clean deploy > /dev/null
   fi
 
