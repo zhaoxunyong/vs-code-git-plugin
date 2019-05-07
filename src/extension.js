@@ -24,6 +24,8 @@ const tmp = require('tmp');
 var fs = require('fs')
 
 let mdTml = null;
+// 下载的根url，注意必须要以/结尾
+const rootUrl = "https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/"
 const newBranchFile = "newBranch.sh";
 const newReleaseFile = "release.sh";
 const tmpdir = tmp.tmpdir;
@@ -82,7 +84,7 @@ async function newBranch() {
 	let newBranch = await myPlugin.chooicingBranch(simpleGit(selectedItem.uri.fsPath));
 	// vscode.window.showInformationMessage(newBranch);
 	let newBranchFile = "newBranch.sh";
-	let newBranchUrl = "https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/"+newBranchFile;
+	let newBranchUrl = rootUrl+newBranchFile;
 	
 	fs.exists(newBranchPath, async function(isExist) {
 		// console.log("isExist----->"+isExist);
@@ -108,7 +110,7 @@ async function newRelease() {
 	let selectedItem = await myPlugin.chooicingFolder();
 	let release = await myPlugin.chooicingRlease(simpleGit(selectedItem.uri.fsPath));
 	// vscode.window.showInformationMessage(newBranch);
-	let newReleaseUrl = "https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/"+newReleaseFile;
+	let newReleaseUrl = rootUrl+newReleaseFile;
 	
 	fs.exists(newReleasePath, async function(isExist) {
 		// console.log("isExist----->"+isExist);
