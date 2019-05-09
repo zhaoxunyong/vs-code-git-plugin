@@ -2,7 +2,7 @@
 	"name": "zerofinance-git",
 	"displayName": "zerofinance-git",
 	"description": "zerofinance-git",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"publisher": "zerofinance",
 	"repository": "https://github.com/zhaoxunyong/vs-code-git-plugin",
 	"engines": {
@@ -18,25 +18,6 @@
 	],
 	"main": "./src/extension.js",
 	"contributes": {
-		"menus": {
-			"editor/context": [
-				{
-					"when": "editorFocus",
-					"command": "extension.newBranch",
-					"group": "navigation"
-				},
-				{
-					"when": "editorFocus",
-					"command": "extension.newRelease",
-					"group": "navigation"
-				},
-				{
-					"when": "editorFocus",
-					"command": "extension.clearCache",
-					"group": "navigation"
-				}
-			]
-		},
 		"commands": [
 			{
 				"command": "extension.newBranch",
