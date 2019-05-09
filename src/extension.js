@@ -7,7 +7,6 @@
 // https://segmentfault.com/a/1190000017279102
 // https://segmentfault.com/a/1190000014758981
 // https://dev.azure.com/it0815/_usersSettings/tokens
-// teh2foynynfdqzxhwe3xqchgkno42yz7h4ergheqhjushrnqtfnq
 // https://www.cnblogs.com/liuxianan/p/vscode-plugin-publish.html
 // https://www.cnblogs.com/virde/p/vscode-extension-input-and-output.html
 // https://www.cnblogs.com/virde/p/vscode-extension-input-and-output.html
