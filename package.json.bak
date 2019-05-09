@@ -2,8 +2,8 @@
 	"name": "zerofinance-git",
 	"displayName": "zerofinance-git",
 	"description": "zerofinance-git",
-	"version": "1.0.8",
-	"publisher": "zerofinance-git",
+	"version": "1.0.0",
+	"publisher": "zerofinance",
 	"repository": "https://github.com/zhaoxunyong/vs-code-git-plugin",
 	"engines": {
 		"vscode": "^1.30.0"
