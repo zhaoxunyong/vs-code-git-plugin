@@ -1,71 +1,52 @@
 {
-	"name": "zerofinance-git",
-	"displayName": "zerofinance-git",
-	"description": "zerofinance-git",
-	"version": "1.0.0",
-	"publisher": "zerofinance",
-	"repository": "https://github.com/zhaoxunyong/vs-code-git-plugin",
-	"engines": {
-		"vscode": "^1.30.0"
-	},
-	"categories": [
-		"Other"
-	],
-	"activationEvents": [
-		"onCommand:extension.newBranch",
-		"onCommand:extension.newRelease",
-		"onCommand:extension.clearCache"
-	],
-	"main": "./src/extension.js",
-	"contributes": {
-		"menus": {
-			"editor/context": [
-				{
-					"when": "editorFocus",
-					"command": "extension.newBranch",
-					"group": "navigation"
-				},
-				{
-					"when": "editorFocus",
-					"command": "extension.newRelease",
-					"group": "navigation"
-				},
-				{
-					"when": "editorFocus",
-					"command": "extension.clearCache",
-					"group": "navigation"
-				}
-			]
-		},
-		"commands": [
-			{
-				"command": "extension.newBranch",
-				"title": "Zerofinance Git: New Branch"
-			},
-			{
-				"command": "extension.newRelease",
-				"title": "Zerofinance Git: New Release"
-			},
-			{
-				"command": "extension.clearCache",
-				"title": "Zerofinance Git: Clear Cache"
-			}
-		]
-	},
-	"scripts": {
-		"postinstall": "node ./node_modules/vscode/bin/install",
-		"test": "node ./node_modules/vscode/bin/test"
-	},
-	"devDependencies": {
-		"typescript": "^3.3.1",
-		"vscode": "^1.1.28",
-		"eslint": "^5.13.0",
-		"@types/node": "^10.12.21",
-		"@types/mocha": "^2.2.42"
-	},
-	"dependencies": {
-		"axios": "^0.18.0",
-		"simple-git": "^1.107.0",
-		"tmp": "0.0.33"
-	}
+    "name": "zerofinance-git",
+    "displayName": "zerofinance-git",
+    "description": "zerofinance-git",
+    "version": "1.0.2",
+    "publisher": "zerofinance",
+    "repository": "https://github.com/zhaoxunyong/vs-code-git-plugin",
+    "engines": {
+        "vscode": "^1.30.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:extension.newBranch",
+        "onCommand:extension.newRelease",
+        "onCommand:extension.clearCache"
+    ],
+    "main": "./src/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "extension.newBranch",
+                "title": "Zerofinance Git: New Branch"
+            },
+            {
+                "command": "extension.newRelease",
+                "title": "Zerofinance Git: New Release"
+            },
+            {
+                "command": "extension.clearCache",
+                "title": "Zerofinance Git: Clear Cache"
+            }
+        ]
+    },
+    "scripts": {
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "typescript": "^3.3.1",
+        "vscode": "^1.1.28",
+        "eslint": "^5.13.0",
+        "@types/node": "^10.12.21",
+        "@types/mocha": "^2.2.42"
+    },
+    "dependencies": {
+        "axios": "^0.18.0",
+        "simple-git": "^1.107.0",
+        "tmp": "0.0.33"
+    }
 }

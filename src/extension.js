@@ -14,22 +14,22 @@
 
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-const vscode = require('vscode');
+const vscode = require('vscode')
 // const {chooicingFolder, chooicingBranch} = require("./MyPlugin");
-const myPlugin = require("./myPlugin");
+const myPlugin = require('./myPlugin')
 const simpleGit = require('simple-git')
 const axios = require('axios')
-const tmp = require('tmp');
-var fs = require('fs')
+const tmp = require('tmp')
+const fs = require('fs')
 
-let mdTml = null;
+let mdTml = null
 // 下载的根url，注意必须要以/结尾
-const rootUrl = "https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/"
-const newBranchFile = "newBranch.sh";
-const newReleaseFile = "release.sh";
-const tmpdir = tmp.tmpdir;
-const newBranchPath = tmpdir+'/'+newBranchFile;
-const newReleasePath = tmpdir+'/'+newReleaseFile;
+const rootUrl = 'https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/'
+const newBranchFile = 'newBranch.sh'
+const newReleaseFile = 'release.sh'
+const tmpdir = tmp.tmpdir
+const newBranchPath = tmpdir + '/' + newBranchFile
+const newReleasePath = tmpdir + '/' + newReleaseFile
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 
@@ -37,135 +37,140 @@ const newReleasePath = tmpdir+'/'+newReleaseFile;
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-	context.subscriptions.push(vscode.commands.registerCommand('extension.newBranch', function () {
-		vscode.window.showInformationMessage("They'll commit and push codes to remote branch automatically. Are you sure?",'Yes','No')
-        .then(function(select){
-					if(select === 'Yes') {
-						newBranch();
-					}
-        });
-	}));
+    context.subscriptions.push(
+        vscode.commands.registerCommand('extension.newBranch', function() {
+            /* vscode.window.showInformationMessage("They'll commit and push codes to remote branch automatically. Are you sure?", 'Yes', 'No').then(function(select) {
+                if (select === 'Yes') {
+                    newBranch()
+                }
+            }) */
+            newBranch()
+        })
+    )
 
-	context.subscriptions.push(vscode.commands.registerCommand('extension.newRelease', () => {
-		vscode.window.showInformationMessage("They'll commit and push codes to remote branch automatically. Are you sure?",'Yes','No')
-        .then(function(select){
-					if(select === 'Yes') {
-						newRelease();
-					}
-        });
-	}));
+    context.subscriptions.push(
+        vscode.commands.registerCommand('extension.newRelease', () => {
+            /* vscode.window.showInformationMessage("They'll commit and push codes to remote branch automatically. Are you sure?", 'Yes', 'No').then(function(select) {
+                if (select === 'Yes') {
+                    newRelease()
+                }
+            }) */
+            newRelease()
+        })
+    )
 
-	context.subscriptions.push(vscode.commands.registerCommand('extension.clearCache', () => {
-		try {
-			fs.unlinkSync(newBranchPath);
-		} catch (error) {
-		}
-		
-		try {
-			fs.unlinkSync(newReleasePath);
-		} catch (error) {
-		}
-		vscode.window.showInformationMessage("Clear cache sussessfully!");
-	}));
+    context.subscriptions.push(
+        vscode.commands.registerCommand('extension.clearCache', () => {
+            try {
+                fs.unlinkSync(newBranchPath)
+            } catch (error) {}
 
-	vscode.window.onDidCloseTerminal((terminal) => {
-		console.log(`onDidCloseTerminal, name: ${terminal.name}`);
-		mdTml = null;
-	});
+            try {
+                fs.unlinkSync(newReleasePath)
+            } catch (error) {}
+            vscode.window.showInformationMessage('Clear cache sussessfully!')
+        })
+    )
+
+    vscode.window.onDidCloseTerminal(terminal => {
+        console.log(`onDidCloseTerminal, name: ${terminal.name}`)
+        mdTml = null
+    })
 }
-exports.activate = activate;
+exports.activate = activate
 
 // this method is called when your extension is deactivated
 function deactivate() {}
 
 async function newBranch() {
-	let selectedItem = await myPlugin.chooicingFolder();
-	let newBranch = await myPlugin.chooicingBranch(simpleGit(selectedItem.uri.fsPath));
-	// vscode.window.showInformationMessage(newBranch);
-	let newBranchFile = "newBranch.sh";
-	let newBranchUrl = rootUrl+newBranchFile;
-	
-	fs.exists(newBranchPath, async function(isExist) {
-		// console.log("isExist----->"+isExist);
-		if(!isExist) {
-			vscode.window.showInformationMessage(`${newBranchFile} is downloading...`)
-			await downloadScripts(newBranchUrl, newBranchPath).catch(err => {
-				vscode.window.showErrorMessage(`Can't found ${newBranchUrl}`);
-			});
-			vscode.window.showInformationMessage(`${newBranchFile} downloaded in ${newBranchPath}.`)
-		}
-		// console.log('newBranchPath======>'+newBranchPath);
-		try {
-			let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newBranchPath}" ${newBranch}`;
-			// console.log('cmdStr======>'+cmdStr);
-			getTerminal().sendText(cmdStr);
-		} catch (err) {
-			vscode.window.showErrorMessage(err);
-		}
-	});
+    let selectedItem = await myPlugin.chooicingFolder()
+    let newBranch = await myPlugin.chooicingBranch(simpleGit(selectedItem.uri.fsPath))
+    // vscode.window.showInformationMessage(newBranch);
+    let newBranchFile = 'newBranch.sh'
+    let newBranchUrl = rootUrl + newBranchFile
+
+    fs.exists(newBranchPath, async function(isExist) {
+        // console.log("isExist----->"+isExist);
+        if (!isExist) {
+            vscode.window.showInformationMessage(`${newBranchFile} is downloading...`)
+            await downloadScripts(newBranchUrl, newBranchPath).catch(err => {
+                vscode.window.showErrorMessage(`Can't found ${newBranchUrl}`)
+            })
+            vscode.window.showInformationMessage(`${newBranchFile} downloaded in ${newBranchPath}.`)
+        }
+        // console.log('newBranchPath======>'+newBranchPath);
+        try {
+            let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newBranchPath}" ${newBranch}`
+            // console.log('cmdStr======>'+cmdStr);
+            getTerminal().sendText(cmdStr)
+        } catch (err) {
+            vscode.window.showErrorMessage(err)
+        }
+    })
 }
 
 async function newRelease() {
-	let selectedItem = await myPlugin.chooicingFolder();
-	let release = await myPlugin.chooicingRlease(simpleGit(selectedItem.uri.fsPath));
-	// vscode.window.showInformationMessage(newBranch);
-	let newReleaseUrl = rootUrl+newReleaseFile;
-	
-	fs.exists(newReleasePath, async function(isExist) {
-		// console.log("isExist----->"+isExist);
-		if(!isExist) {
-			vscode.window.showInformationMessage(`${newReleaseFile} is downloading...`)
-			await downloadScripts(newReleaseUrl, newReleasePath).catch(err => {
-				vscode.window.showErrorMessage(`Can't found ${newReleaseUrl}`);
-			});
-			vscode.window.showInformationMessage(`${newReleaseFile} downloaded in ${newReleasePath}.`)
-		}
-		try {
-			// console.log('newReleasePath======>'+newReleasePath);
-			let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newReleasePath}" ${release.nextRelase} ${release.currentDate}`;
-			// console.log('cmdStr======>'+cmdStr);
-			getTerminal().sendText(cmdStr);
-		} catch (err) {
-			vscode.window.showErrorMessage(err);
-		}
-	});
+    let selectedItem = await myPlugin.chooicingFolder()
+    let release = await myPlugin.chooicingRlease(simpleGit(selectedItem.uri.fsPath))
+    // vscode.window.showInformationMessage(newBranch);
+    let newReleaseUrl = rootUrl + newReleaseFile
+
+    fs.exists(newReleasePath, async function(isExist) {
+        // console.log("isExist----->"+isExist);
+        if (!isExist) {
+            vscode.window.showInformationMessage(`${newReleaseFile} is downloading...`)
+            await downloadScripts(newReleaseUrl, newReleasePath).catch(err => {
+                vscode.window.showErrorMessage(`Can't found ${newReleaseUrl}`)
+            })
+            vscode.window.showInformationMessage(`${newReleaseFile} downloaded in ${newReleasePath}.`)
+        }
+        try {
+            let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newReleasePath}" ${release.nextRelase} ${release.currentDate}`
+            console.log('cmdStr======>' + cmdStr)
+            getTerminal().sendText(cmdStr)
+        } catch (err) {
+            vscode.window.showErrorMessage(err)
+        }
+    })
 }
 
 function getTerminal() {
-	if(mdTml == null) {
-		mdTml = vscode.window.createTerminal("zerofinance");
-	}
-	mdTml.show(true);
-	return mdTml;
+    if (mdTml == null) {
+        mdTml = vscode.window.createTerminal('zerofinance')
+    }
+    mdTml.show(true)
+    return mdTml
 }
 
 function downloadScripts(url, file) {
-	return new Promise((resolve, reject) => {
-		axios({
-				url: url,
-				method: 'GET',
-				responseType: 'blob', // important
-				headers: {
-					'Cache-Control': 'no-cache'
-				}
-		  }).then((response) => {
-				fs.writeFile(file, response.data, err => {
-					if(err) {
-						throw err;
-					} else {
-						resolve(file);
-					}
-				});
-		  }).catch(function (error) {
-				// handle error
-				// console.log("error->", error);
-				reject(error);
-				// throw new Error(error);
-		  });
-	});
+    return new Promise((resolve, reject) => {
+        axios({
+            url: url,
+            method: 'GET',
+            responseType: 'blob', // important
+            headers: {
+                'Cache-Control': 'no-cache'
+            }
+        })
+            .then(response => {
+                fs.writeFile(file, response.data, err => {
+                    if (err) {
+                        throw err
+                    } else {
+                        resolve(file)
+                    }
+                })
+            })
+            .catch(function(error) {
+                // handle error
+                // console.log("error->", error);
+                reject(error)
+                // throw new Error(error);
+            })
+    })
 }
 
 module.exports = {
-	activate,
-	deactivate
+    activate,
+    deactivate
 }
