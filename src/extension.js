@@ -111,7 +111,8 @@ async function newBranch() {
 
 async function newRelease() {
     let selectedItem = await myPlugin.chooicingFolder()
-    let release = await myPlugin.chooicingRlease(simpleGit(selectedItem.uri.fsPath))
+    let releaseType = await myPlugin.chooicingRleaseType()
+    let release = await myPlugin.chooicingRlease(releaseType, simpleGit(selectedItem.uri.fsPath))
     // vscode.window.showInformationMessage(newBranch);
     let newReleaseUrl = rootUrl + newReleaseFile
 
