@@ -118,8 +118,19 @@ async function newBranch() {
  */
 async function newRelease() {
     let selectedItem = await myPlugin.chooicingFolder()
+    let git = simpleGit(selectedItem.uri.fsPath)
+
     let releaseType = await myPlugin.chooicingRleaseType()
-    let release = await myPlugin.chooicingRlease(releaseType, simpleGit(selectedItem.uri.fsPath))
+    let release = {}
+    let selectedRelease = ''
+    // Only for tag the release version
+    if ('tag' === releaseType) {
+        selectedRelease = await myPlugin.listAllRemoteReleaseVersions(git)
+        release = myPlugin.chooicingTag(selectedRelease)
+    } else {
+        release = await myPlugin.chooicingRlease(releaseType, git)
+    }
+    console.log('release----->', release)
     // vscode.window.showInformationMessage(newBranch);
     let newReleaseUrl = rootUrl + newReleaseFile
 
@@ -133,7 +144,7 @@ async function newRelease() {
             vscode.window.showInformationMessage(`${newReleaseFile} downloaded in ${newReleasePath}.`)
         }
         try {
-            let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newReleasePath}" ${release.nextRelase} ${release.currentDate}`
+            let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newReleasePath}" ${release.nextRelase} ${release.currentDate} ${release.releaseType}`
             console.log('cmdStr======>' + cmdStr)
             getTerminal().sendText(cmdStr)
         } catch (err) {

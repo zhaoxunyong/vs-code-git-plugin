@@ -37,6 +37,18 @@ function getTag(simpleGit) {
     })
 }
 
+function getAllReleaseVersion(simpleGit) {
+    return new Promise((resolve, reject) => {
+        simpleGit.branch((err, branch) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve(branch)
+            }
+        })
+    })
+}
+
 /**
  * @description: Show all of your workspaces in the select option.
  * @returns the project you picked
@@ -97,18 +109,19 @@ async function chooicingBranch(simpleGit) {
 async function chooicingRlease(releaseType, simpleGit) {
     const currentDate = dateUtils.formatTime('yyyyMMddhhmm', new Date())
     let branch = await getBranch(simpleGit)
+    console.log('branch--->', branch)
     /* if (!branch.current.endsWith('.x')) {
                 vscode.window.showErrorMessage('Only support ' + releaseType + ' version based on branch version(similar to 1.0.x)!')
                 return
             } */
     let currentBranch = getCurrentBranch(branch)
-    let tags = await getTag(simpleGit)
+    // let tags = await getTag(simpleGit)
     let nextRelase = ''
     if (currentBranch == '') {
         vscode.window.showErrorMessage('Please create a branch first.')
         return
     } else {
-        let currentBranchs = currentBranch.split('.')
+        /* let currentBranchs = currentBranch.split('.')
         let [b1, b2] = currentBranchs
         // console.log("Latest available tag: %s", tags.latest);
         const latestTag = tags.latest
@@ -132,6 +145,21 @@ async function chooicingRlease(releaseType, simpleGit) {
         } else {
             // 没有tag，默认以当前分支创建
             nextRelase = `${b1}.${b2}.0.${releaseType}`
+        } */
+        let currentBranch = getMaxReleaseBranch(branch)
+        let currentReleases = currentBranch.split('.')
+        let [b1, b2] = currentReleases
+        if (currentReleases.length >= 3) {
+            const [p1, p2, p3] = currentReleases
+            const compareBranch = b1 + b2
+            const compareTag = p1 + p2
+            // 如果当前tag的版本与当前分支的不一样，以当前分支为主
+            if (compareBranch != compareTag) {
+                nextRelase = `${b1}.${b2}.0.${releaseType}`
+            } else {
+                const nextP3 = parseInt(p3) + 1
+                nextRelase = p1 + '.' + p2 + '.' + nextP3 + '.' + releaseType
+            }
         }
         return await vscode.window
             .showInputBox({
@@ -152,9 +180,19 @@ async function chooicingRlease(releaseType, simpleGit) {
                 if (!nextRelase) return
                 return {
                     nextRelase: nextRelase,
-                    currentDate: currentDate
+                    currentDate: currentDate,
+                    releaseType: releaseType
                 }
             })
+    }
+}
+
+function chooicingTag(selectedRelease) {
+    const currentDate = dateUtils.formatTime('yyyyMMddhhmm', new Date())
+    return {
+        nextRelase: selectedRelease,
+        currentDate: currentDate,
+        releaseType: 'tag'
     }
 }
 
@@ -177,9 +215,26 @@ async function chooicingRleaseType() {
         {
             label: 'hotfix',
             description: 'The hotfix version for release.'
+        },
+        {
+            label: 'tag',
+            description: 'Tag the release version after released.'
         }
     ]
     return await vscode.window.showQuickPick(items, { placeHolder: "Which release type you'd like to pick?" }).then(value => {
+        return value.label
+    })
+}
+
+async function listAllRemoteReleaseVersions(simpleGit) {
+    let branch = await getAllReleaseVersion(simpleGit)
+    let releaseBranchs = getRemoteReleaseBranchs(branch)
+    let items = releaseBranchs.map(ver => {
+        return {
+            label: ver
+        }
+    })
+    return await vscode.window.showQuickPick(items, { placeHolder: 'Which release type you want to pick?' }).then(value => {
         return value.label
     })
 }
@@ -191,20 +246,6 @@ async function chooicingRleaseType() {
  * @Date: 2019-07-03 13:57:44
  */
 function getCurrentBranch(branch) {
-    /* let currentBranchTemp = 0
-    let currentBranch = ''
-    for (let key in branch.branches) {
-        if (!key.startsWith('remotes/') && key.endsWith('.x')) {
-            let keyTemp = parseInt(key.replace(/\.|x/gm, ''))
-            if (keyTemp > currentBranchTemp) {
-                currentBranchTemp = keyTemp
-                currentBranch = key
-            }
-        }
-    }
-    // console.log("currentBranch--->"+currentBranch);
-    return currentBranch */
-
     let currentBranch = ''
     for (let version in branch.branches) {
         if (version.startsWith('remotes/origin/') && version.endsWith('.x')) {
@@ -217,6 +258,36 @@ function getCurrentBranch(branch) {
 }
 
 /**
+ * @description: Get the maximum version from the remote branch
+ * @param {Branch Object} branch
+ * @returns the maximum version
+ * @Date: 2019-07-03 13:57:44
+ */
+function getMaxReleaseBranch(branch) {
+    let currentBranch = ''
+    for (let version in branch.branches) {
+        if (version.startsWith('remotes/origin/') && version.endsWith('.release')) {
+            const remoteBranchVersion = version.split('/')[2]
+            currentBranch = remoteBranchVersion
+        }
+    }
+    // console.log('currentBranch--->', currentBranch)
+    return currentBranch
+}
+
+function getRemoteReleaseBranchs(branch) {
+    let releaseBranchs = []
+    for (let version in branch.branches) {
+        if (version.startsWith('remotes/origin/') && version.endsWith('.release')) {
+            const remoteBranchVersion = version.split('/')[2]
+            releaseBranchs.push(remoteBranchVersion)
+        }
+    }
+    // console.log('currentBranch--->', currentBranch)
+    return releaseBranchs
+}
+
+/**
  * @description: Expose objects to the outside
  * @Date: 2019-07-03 13:58:39
  */
@@ -224,5 +295,7 @@ module.exports = {
     chooicingFolder,
     chooicingBranch,
     chooicingRlease,
-    chooicingRleaseType
+    chooicingRleaseType,
+    listAllRemoteReleaseVersions,
+    chooicingTag
 }
