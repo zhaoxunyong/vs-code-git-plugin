@@ -26,6 +26,7 @@ fi
 
 branchVersion=$1
 newDate=$2
+releaseType=$3
 
 if [[ "$branchVersion" == "" || "$newDate" == "" ]]; then
   # echo "branchVersion must be not empty!"
@@ -117,18 +118,24 @@ echo "branchVersion--------${branchVersion}"
 echo "newTag--------${newTag}"
 echo "currentBranchVersion--------${currentBranchVersion}"
 SwitchBranch $branchVersion
-changeReleaseVersion &> /dev/null
 
-# deploy
-cat pom.xml 2>/dev/null | grep "<skip>false</skip>" &> /dev/null
-if [[ $? == 0 ]]; then
-  mvn clean deploy > /dev/null
+if [[ $releaseType == "tag" ]]; then
+  Tag $newTag
+  git checkout $currentBranchVersion
+else
+  changeReleaseVersion &> /dev/null
+
+  # deploy
+  cat pom.xml 2>/dev/null | grep "<skip>false</skip>" &> /dev/null
+  if [[ $? == 0 ]]; then
+    mvn clean deploy > /dev/null
+  fi
+  Push $branchVersion
+  # Tag $newTag
+  git checkout $currentBranchVersion
+  changeNextVersion &> /dev/null
+  Push $currentBranchVersion
 fi
-Push $branchVersion
-Tag $newTag
-git checkout $currentBranchVersion
-changeNextVersion &> /dev/null
-Push $currentBranchVersion
 
 # Keep only the last 3 releases version
 echo "Deleting those unused release or hotfix branches..."

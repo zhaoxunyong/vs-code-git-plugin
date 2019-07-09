@@ -15,7 +15,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode')
-// const {chooicingFolder, chooicingBranch} = require("./MyPlugin");
 const myPlugin = require('./myPlugin')
 const simpleGit = require('simple-git')
 const axios = require('axios')
@@ -82,6 +81,10 @@ exports.activate = activate
 // this method is called when your extension is deactivated
 function deactivate() {}
 
+/**
+ * @description: Create branch
+ * @Date: 2019-07-03 14:05:21
+ */
 async function newBranch() {
     let selectedItem = await myPlugin.chooicingFolder()
     let newBranch = await myPlugin.chooicingBranch(simpleGit(selectedItem.uri.fsPath))
@@ -109,10 +112,25 @@ async function newBranch() {
     })
 }
 
+/**
+ * @description: Create release
+ * @Date: 2019-07-03 14:05:43
+ */
 async function newRelease() {
     let selectedItem = await myPlugin.chooicingFolder()
+    let git = simpleGit(selectedItem.uri.fsPath)
+
     let releaseType = await myPlugin.chooicingRleaseType()
-    let release = await myPlugin.chooicingRlease(releaseType, simpleGit(selectedItem.uri.fsPath))
+    let release = {}
+    let selectedRelease = ''
+    // Only for tag the release version
+    if ('tag' === releaseType) {
+        selectedRelease = await myPlugin.listAllRemoteReleaseVersions(git)
+        release = myPlugin.chooicingTag(selectedRelease)
+    } else {
+        release = await myPlugin.chooicingRlease(releaseType, git)
+    }
+    console.log('release----->', release)
     // vscode.window.showInformationMessage(newBranch);
     let newReleaseUrl = rootUrl + newReleaseFile
 
@@ -126,7 +144,7 @@ async function newRelease() {
             vscode.window.showInformationMessage(`${newReleaseFile} downloaded in ${newReleasePath}.`)
         }
         try {
-            let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newReleasePath}" ${release.nextRelase} ${release.currentDate}`
+            let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newReleasePath}" ${release.nextRelase} ${release.currentDate} ${release.releaseType}`
             console.log('cmdStr======>' + cmdStr)
             getTerminal().sendText(cmdStr)
         } catch (err) {
@@ -135,6 +153,11 @@ async function newRelease() {
     })
 }
 
+/**
+ * @description: Get the terminal of vscode
+ * @returns terminal
+ * @Date: 2019-07-03 14:05:53
+ */
 function getTerminal() {
     if (mdTml == null) {
         mdTml = vscode.window.createTerminal('zerofinance')
@@ -143,6 +166,11 @@ function getTerminal() {
     return mdTml
 }
 
+/**
+ * @description: Download the script from github
+ * @param {string} github url
+ * @Date: 2019-07-03 14:06:21
+ */
 function downloadScripts(url, file) {
     return new Promise((resolve, reject) => {
         axios({
@@ -171,6 +199,10 @@ function downloadScripts(url, file) {
     })
 }
 
+/**
+ * @description: Expose objects to the outside
+ * @Date: 2019-07-03 13:58:39
+ */
 module.exports = {
     activate,
     deactivate
