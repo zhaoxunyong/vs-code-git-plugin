@@ -68,7 +68,7 @@ function Push() {
 
 function Tag() {
     newTag=$1
-    git tag -a $newTag -m "version ${newTag}"
+    git tag -a $newTag -m "For prod version ${newTag}"
     if [[ $? != 0 ]]; then
       echo "Tag error!"
       exit -1

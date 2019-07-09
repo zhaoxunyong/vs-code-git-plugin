@@ -121,8 +121,9 @@ async function chooicingRlease(releaseType, simpleGit) {
         vscode.window.showErrorMessage('Please create a branch first.')
         return
     } else {
-        /* let currentBranchs = currentBranch.split('.')
+        let currentBranchs = currentBranch.split('.')
         let [b1, b2] = currentBranchs
+        /* 
         // console.log("Latest available tag: %s", tags.latest);
         const latestTag = tags.latest
         if (latestTag != undefined && latestTag.indexOf('-') != -1) {
@@ -146,20 +147,23 @@ async function chooicingRlease(releaseType, simpleGit) {
             // 没有tag，默认以当前分支创建
             nextRelase = `${b1}.${b2}.0.${releaseType}`
         } */
-        let currentReleases = getMaxRemoteReleaseBranch(branch).split('.')
-        let currentBranchs = currentBranch.split('.')
-        let [b1, b2] = currentBranchs
-        if (currentReleases.length >= 3) {
-            const [p1, p2, p3] = currentReleases
-            const compareBranch = b1 + b2
-            const compareTag = p1 + p2
-            // 如果当前tag的版本与当前分支的不一样，以当前分支为主
-            if (compareBranch != compareTag) {
-                nextRelase = `${b1}.${b2}.0.${releaseType}`
-            } else {
-                const nextP3 = parseInt(p3) + 1
-                nextRelase = p1 + '.' + p2 + '.' + nextP3 + '.' + releaseType
+        let maxRemoteReleaseBranch = getMaxRemoteReleaseBranch(branch)
+        if (maxRemoteReleaseBranch) {
+            let currentReleases = maxRemoteReleaseBranch.split('.')
+            if (currentReleases.length >= 3) {
+                const [p1, p2, p3] = currentReleases
+                const compareBranch = b1 + b2
+                const compareTag = p1 + p2
+                // 如果当前tag的版本与当前分支的不一样，以当前分支为主
+                if (compareBranch != compareTag) {
+                    nextRelase = `${b1}.${b2}.0.${releaseType}`
+                } else {
+                    const nextP3 = parseInt(p3) + 1
+                    nextRelase = p1 + '.' + p2 + '.' + nextP3 + '.' + releaseType
+                }
             }
+        } else {
+            nextRelase = `${b1}.${b2}.0.${releaseType}`
         }
         return await vscode.window
             .showInputBox({
@@ -234,7 +238,7 @@ async function listAllRemoteReleaseVersions(simpleGit) {
             label: ver
         }
     })
-    return await vscode.window.showQuickPick(items, { placeHolder: 'Which release type you want to pick?' }).then(value => {
+    return await vscode.window.showQuickPick(items, { placeHolder: 'Which release type would you like to pick?' }).then(value => {
         return value.label
     })
 }
@@ -266,7 +270,7 @@ function getCurrentRemoteBranch(branch) {
 function getMaxRemoteReleaseBranch(branch) {
     let currentBranch = ''
     for (let version in branch.branches) {
-        if (version.startsWith('remotes/origin/') && version.endsWith('.release')) {
+        if (version.startsWith('remotes/origin/') && (version.endsWith('.release') || version.endsWith('.hotfix'))) {
             const remoteBranchVersion = version.split('/')[2]
             currentBranch = remoteBranchVersion
         }
@@ -283,13 +287,13 @@ function getMaxRemoteReleaseBranch(branch) {
 function getAllRemoteReleaseBranchs(branch) {
     let releaseBranchs = []
     for (let version in branch.branches) {
-        if (version.startsWith('remotes/origin/') && version.endsWith('.release')) {
+        if (version.startsWith('remotes/origin/') && (version.endsWith('.release') || version.endsWith('.hotfix'))) {
             const remoteBranchVersion = version.split('/')[2]
             releaseBranchs.push(remoteBranchVersion)
         }
     }
     // console.log('currentBranch--->', currentBranch)
-    return releaseBranchs
+    return releaseBranchs.reverse()
 }
 
 /**
