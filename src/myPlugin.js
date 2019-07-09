@@ -66,7 +66,7 @@ async function chooicingFolder() {
  */
 async function chooicingBranch(simpleGit) {
     let branch = await getBranch(simpleGit)
-    let currentBranch = getCurrentBranch(branch)
+    let currentBranch = getCurrentRemoteBranch(branch)
     // Get next branch
     const currentBranchs = currentBranch.split('.')
     let nextBranch = ''
@@ -114,7 +114,7 @@ async function chooicingRlease(releaseType, simpleGit) {
                 vscode.window.showErrorMessage('Only support ' + releaseType + ' version based on branch version(similar to 1.0.x)!')
                 return
             } */
-    let currentBranch = getCurrentBranch(branch)
+    let currentBranch = getCurrentRemoteBranch(branch)
     // let tags = await getTag(simpleGit)
     let nextRelase = ''
     if (currentBranch == '') {
@@ -146,9 +146,9 @@ async function chooicingRlease(releaseType, simpleGit) {
             // 没有tag，默认以当前分支创建
             nextRelase = `${b1}.${b2}.0.${releaseType}`
         } */
-        let currentBranch = getMaxReleaseBranch(branch)
-        let currentReleases = currentBranch.split('.')
-        let [b1, b2] = currentReleases
+        let currentReleases = getMaxRemoteReleaseBranch(branch).split('.')
+        let currentBranchs = currentBranch.split('.')
+        let [b1, b2] = currentBranchs
         if (currentReleases.length >= 3) {
             const [p1, p2, p3] = currentReleases
             const compareBranch = b1 + b2
@@ -171,7 +171,7 @@ async function chooicingRlease(releaseType, simpleGit) {
                 value: nextRelase,
                 validateInput: function(text) {
                     if (text == '' || text.indexOf('.' + releaseType) == -1) {
-                        return 'Please fill in a correct relase name: similar to 1.0.0.' + releaseType + ' and so on.'
+                        return 'Please fill in a correct relase name: it similar to be 1.0.0.' + releaseType + ' and so on.'
                     }
                     return ''
                 } // 对输入内容进行验证并返回
@@ -221,14 +221,14 @@ async function chooicingRleaseType() {
             description: 'Tag the release version after released.'
         }
     ]
-    return await vscode.window.showQuickPick(items, { placeHolder: "Which release type you'd like to pick?" }).then(value => {
+    return await vscode.window.showQuickPick(items, { placeHolder: 'Which release type would you like to pick?' }).then(value => {
         return value.label
     })
 }
 
 async function listAllRemoteReleaseVersions(simpleGit) {
     let branch = await getAllReleaseVersion(simpleGit)
-    let releaseBranchs = getRemoteReleaseBranchs(branch)
+    let releaseBranchs = getAllRemoteReleaseBranchs(branch)
     let items = releaseBranchs.map(ver => {
         return {
             label: ver
@@ -240,12 +240,12 @@ async function listAllRemoteReleaseVersions(simpleGit) {
 }
 
 /**
- * @description: Get the maximum version from the remote branch
+ * @description: Get the current version from the remote branch
  * @param {Branch Object} branch
  * @returns the maximum version
  * @Date: 2019-07-03 13:57:44
  */
-function getCurrentBranch(branch) {
+function getCurrentRemoteBranch(branch) {
     let currentBranch = ''
     for (let version in branch.branches) {
         if (version.startsWith('remotes/origin/') && version.endsWith('.x')) {
@@ -259,11 +259,11 @@ function getCurrentBranch(branch) {
 
 /**
  * @description: Get the maximum version from the remote branch
- * @param {Branch Object} branch
+ * @param {Object} branch
  * @returns the maximum version
  * @Date: 2019-07-03 13:57:44
  */
-function getMaxReleaseBranch(branch) {
+function getMaxRemoteReleaseBranch(branch) {
     let currentBranch = ''
     for (let version in branch.branches) {
         if (version.startsWith('remotes/origin/') && version.endsWith('.release')) {
@@ -275,7 +275,12 @@ function getMaxReleaseBranch(branch) {
     return currentBranch
 }
 
-function getRemoteReleaseBranchs(branch) {
+/**
+ * @description: Get all of the remote release branch versions
+ * @param {type}
+ * @Date: 2019-07-09 09:27:57
+ */
+function getAllRemoteReleaseBranchs(branch) {
     let releaseBranchs = []
     for (let version in branch.branches) {
         if (version.startsWith('remotes/origin/') && version.endsWith('.release')) {
