@@ -26,9 +26,11 @@ let mdTml = null
 const rootUrl = 'https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/'
 const newBranchFile = 'newBranch.sh'
 const newReleaseFile = 'release.sh'
+const newTagFile = 'tag.sh'
 const tmpdir = tmp.tmpdir
 const newBranchPath = tmpdir + '/' + newBranchFile
 const newReleasePath = tmpdir + '/' + newReleaseFile
+const newTagPath = tmpdir + '/' + newTagFile
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 
@@ -66,6 +68,10 @@ function activate(context) {
 
             try {
                 fs.unlinkSync(newReleasePath)
+            } catch (error) {}
+
+            try {
+                fs.unlinkSync(newTagPath)
             } catch (error) {}
             vscode.window.showInformationMessage('Clear cache sussessfully!')
         })
@@ -127,30 +133,50 @@ async function newRelease() {
     if ('tag' === releaseType) {
         selectedRelease = await myPlugin.listAllRemoteReleaseVersions(git)
         release = myPlugin.chooicingTag(selectedRelease)
+        // vscode.window.showInformationMessage(newBranch);
+        let newTagUrl = rootUrl + newTagFile
+
+        fs.exists(newTagPath, async function(isExist) {
+            // console.log("isExist----->"+isExist);
+            if (!isExist) {
+                vscode.window.showInformationMessage(`${newTagFile} is downloading...`)
+                await downloadScripts(newTagUrl, newTagPath).catch(err => {
+                    vscode.window.showErrorMessage(`Can't found ${newTagUrl}`)
+                })
+                vscode.window.showInformationMessage(`${newTagPath} downloaded in ${newTagPath}.`)
+            }
+            try {
+                let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newTagPath}" ${release.nextRelase} ${release.currentDate}`
+                console.log('cmdStr======>' + cmdStr)
+                getTerminal().sendText(cmdStr)
+            } catch (err) {
+                vscode.window.showErrorMessage(err)
+            }
+        })
     } else {
         release = await myPlugin.chooicingRlease(releaseType, git)
-    }
-    console.log('release----->', release)
-    // vscode.window.showInformationMessage(newBranch);
-    let newReleaseUrl = rootUrl + newReleaseFile
+        console.log('release----->', release)
+        // vscode.window.showInformationMessage(newBranch);
+        let newReleaseUrl = rootUrl + newReleaseFile
 
-    fs.exists(newReleasePath, async function(isExist) {
-        // console.log("isExist----->"+isExist);
-        if (!isExist) {
-            vscode.window.showInformationMessage(`${newReleaseFile} is downloading...`)
-            await downloadScripts(newReleaseUrl, newReleasePath).catch(err => {
-                vscode.window.showErrorMessage(`Can't found ${newReleaseUrl}`)
-            })
-            vscode.window.showInformationMessage(`${newReleaseFile} downloaded in ${newReleasePath}.`)
-        }
-        try {
-            let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newReleasePath}" ${release.nextRelase} ${release.currentDate} ${release.releaseType}`
-            console.log('cmdStr======>' + cmdStr)
-            getTerminal().sendText(cmdStr)
-        } catch (err) {
-            vscode.window.showErrorMessage(err)
-        }
-    })
+        fs.exists(newReleasePath, async function(isExist) {
+            // console.log("isExist----->"+isExist);
+            if (!isExist) {
+                vscode.window.showInformationMessage(`${newReleaseFile} is downloading...`)
+                await downloadScripts(newReleaseUrl, newReleasePath).catch(err => {
+                    vscode.window.showErrorMessage(`Can't found ${newReleaseUrl}`)
+                })
+                vscode.window.showInformationMessage(`${newReleaseFile} downloaded in ${newReleasePath}.`)
+            }
+            try {
+                let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newReleasePath}" ${release.nextRelase} ${release.currentDate} ${release.releaseType}`
+                console.log('cmdStr======>' + cmdStr)
+                getTerminal().sendText(cmdStr)
+            } catch (err) {
+                vscode.window.showErrorMessage(err)
+            }
+        })
+    }
 }
 
 /**
