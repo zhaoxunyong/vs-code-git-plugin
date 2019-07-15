@@ -23,7 +23,11 @@ const fs = require('fs')
 
 let mdTml = null
 // 下载的根url，注意必须要以/结尾
-const rootUrl = 'https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/'
+// const rootUrl = 'https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/'
+let rootUrl = process.env.GIT_PLUGIN_URL
+if (!rootUrl) {
+    rootUrl = 'http://gitlab.aeasycredit.net/dave.zhao/deployPlugin/raw/master/'
+}
 const newBranchFile = 'newBranch.sh'
 const newReleaseFile = 'release.sh'
 const newTagFile = 'tag.sh'

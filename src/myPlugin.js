@@ -269,13 +269,19 @@ function getCurrentRemoteBranch(branch) {
  */
 function getMaxRemoteReleaseBranch(branch) {
     let currentBranch = ''
+    let tempBranch = 0
     for (let version in branch.branches) {
         if (version.startsWith('remotes/origin/') && (version.endsWith('.release') || version.endsWith('.hotfix'))) {
             const remoteBranchVersion = version.split('/')[2]
-            currentBranch = remoteBranchVersion
+            let temp = parseInt(remoteBranchVersion.replace(/\.|release|hotfix/gm, ''))
+            if (temp >= tempBranch) {
+                tempBranch = temp
+                currentBranch = remoteBranchVersion
+            }
         }
     }
-    // console.log('currentBranch--->', currentBranch)
+    console.log('tempBranch--->', tempBranch)
+    console.log('currentBranch--->', currentBranch)
     return currentBranch
 }
 
