@@ -19,13 +19,18 @@ function getBranch(simpleGit) {
     })
 }
 
+function getShowTagInDropDown() {
+    // If you wanna get realtime config, must use "vscode.workspace.getConfiguration()"
+    return vscode.workspace.getConfiguration().get('zerofinanceGit.showTagInDropDownPreference')
+}
+
 /**
  * @description: Get tag object via simpleGit
  * @param {simple-git} simpleGit
  * @returns tag object
  * @Date: 2019-07-03 13:52:04
  */
-function getTag(simpleGit) {
+/* function getTag(simpleGit) {
     return new Promise((resolve, reject) => {
         simpleGit.tags((err, tags) => {
             if (err) {
@@ -35,7 +40,7 @@ function getTag(simpleGit) {
             }
         })
     })
-}
+} */
 
 function getAllReleaseVersion(simpleGit) {
     return new Promise((resolve, reject) => {
@@ -219,12 +224,15 @@ async function chooicingRleaseType() {
         {
             label: 'hotfix',
             description: 'The hotfix version for release.'
-        },
-        {
-            label: 'tag',
-            description: 'Tag the release version after released.'
         }
     ]
+    const showTag = getShowTagInDropDown()
+    if (showTag) {
+        items.push({
+            label: 'tag',
+            description: 'Tag the release version after released.'
+        })
+    }
     return await vscode.window.showQuickPick(items, { placeHolder: 'Which release type would you like to pick?' }).then(value => {
         return value.label
     })
