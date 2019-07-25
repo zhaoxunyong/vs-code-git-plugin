@@ -194,8 +194,18 @@ async function newRelease() {
                 vscode.window.showInformationMessage(`${newReleaseFile} downloaded in ${newReleasePath}.`)
             }
             try {
-                const needTagWhileBranch = getNeedTagWhileBranch()
+                let needTagWhileBranch = getNeedTagWhileBranch()
                 console.log('needTagWhileBranch------------', needTagWhileBranch)
+                if (needTagWhileBranch) {
+                    let tooltips = `It will tag ${release.nextRelase}-${release.currentDate} for ${release.nextRelase} automatically. Are you sure to tag?`
+                    needTagWhileBranch = await vscode.window.showInformationMessage(tooltips, 'Yes', 'No').then(function(select) {
+                        if (select === 'No') {
+                            return false
+                        } else {
+                            return true
+                        }
+                    })
+                }
                 let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newReleasePath}" ${release.nextRelase} ${release.currentDate} ${needTagWhileBranch}`
                 console.log('cmdStr======>' + cmdStr)
                 getTerminal().sendText(cmdStr)

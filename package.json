@@ -2,7 +2,7 @@
     "name": "zerofinance-git",
     "displayName": "zerofinance-git",
     "description": "zerofinance-git",
-    "version": "1.1.5",
+    "version": "1.1.6",
     "publisher": "zerofinance",
     "repository": "https://github.com/zhaoxunyong/vs-code-git-plugin",
     "engines": {
@@ -33,11 +33,11 @@
                     "description": "Gitlab url for download scripts"
                 },
                 "zerofinanceGit.tagWhileBranchPreference": {
-                    "type": "string",
-                    "default": "false",
+                    "type": "boolean",
+                    "default": false,
                     "enum": [
-                        "true",
-                        "false"
+                        true,
+                        false
                     ],
                     "description": "Whether or not to tag the release version automatically",
                     "enumDescriptions": [
