@@ -12,6 +12,7 @@
 // https://www.cnblogs.com/virde/p/vscode-extension-input-and-output.html
 // http://nodejs.cn/api/fs.html#fs_fs_unlinksync_path
 // https://www.cnblogs.com/liuxianan/p/vscode-plugin-snippets-and-settings.html
+// https://code.visualstudio.com/api/references/contribution-points
 
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
@@ -23,13 +24,13 @@ const tmp = require('tmp')
 const fs = require('fs')
 
 let mdTml = null
-// 下载的根url，注意必须要以/结尾
 // const rootUrl = 'https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/'
 // let rootUrl = process.env.GIT_PLUGIN_URL
-let rootUrl = vscode.workspace.getConfiguration().get('zerofinanceGit.gitScriptsUrlPreference')
-if (!rootUrl) {
-    rootUrl = 'http://gitlab.aeasycredit.net/dave.zhao/deployPlugin/raw/master'
-}
+// const config = vscode.workspace.getConfiguration()
+// let rootUrl = vscode.workspace.getConfiguration().get('zerofinanceGit.gitScriptsUrlPreference')
+// if (!rootUrl) {
+//     rootUrl = 'http://gitlab.aeasycredit.net/dave.zhao/deployPlugin/raw/master'
+// }
 const newBranchFile = 'newBranch.sh'
 const newReleaseFile = 'release.sh'
 const newTagFile = 'tag.sh'
@@ -39,6 +40,24 @@ const newReleasePath = tmpdir + '/' + newReleaseFile
 const newTagPath = tmpdir + '/' + newTagFile
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
+
+function getRootUrl() {
+    // If you wanna get realtime config, must use "vscode.workspace.getConfiguration()"
+    let rootUrl = vscode.workspace.getConfiguration().get('zerofinanceGit.gitScriptsUrlPreference')
+    if (!rootUrl) {
+        rootUrl = 'http://gitlab.aeasycredit.net/dave.zhao/deployPlugin/raw/master'
+    }
+    return rootUrl
+}
+
+// function getGitHomePath() {
+//     return vscode.workspace.getConfiguration().get('zerofinanceGit.gitHomePathPreference')
+// }
+
+function getNeedTagWhileBranch() {
+    // If you wanna get realtime config, must use "vscode.workspace.getConfiguration()"
+    return vscode.workspace.getConfiguration().get('zerofinanceGit.tagWhileBranchPreference')
+}
 
 /**
  * @param {vscode.ExtensionContext} context
@@ -102,7 +121,7 @@ async function newBranch() {
     let newBranch = await myPlugin.chooicingBranch(simpleGit(selectedItem.uri.fsPath))
     // vscode.window.showInformationMessage(newBranch);
     let newBranchFile = 'newBranch.sh'
-    let newBranchUrl = rootUrl + '/' + newBranchFile
+    let newBranchUrl = getRootUrl() + '/' + newBranchFile
 
     fs.exists(newBranchPath, async function(isExist) {
         // console.log("isExist----->"+isExist);
@@ -140,7 +159,7 @@ async function newRelease() {
         selectedRelease = await myPlugin.listAllRemoteReleaseVersions(git)
         release = myPlugin.chooicingTag(selectedRelease)
         // vscode.window.showInformationMessage(newBranch);
-        let newTagUrl = rootUrl + '/' + newTagFile
+        let newTagUrl = getRootUrl() + '/' + newTagFile
 
         fs.exists(newTagPath, async function(isExist) {
             // console.log("isExist----->"+isExist);
@@ -163,7 +182,7 @@ async function newRelease() {
         release = await myPlugin.chooicingRlease(releaseType, git)
         console.log('release----->', release)
         // vscode.window.showInformationMessage(newBranch);
-        let newReleaseUrl = rootUrl + '/' + newReleaseFile
+        let newReleaseUrl = getRootUrl() + '/' + newReleaseFile
 
         fs.exists(newReleasePath, async function(isExist) {
             // console.log("isExist----->"+isExist);
@@ -175,7 +194,9 @@ async function newRelease() {
                 vscode.window.showInformationMessage(`${newReleaseFile} downloaded in ${newReleasePath}.`)
             }
             try {
-                let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newReleasePath}" ${release.nextRelase} ${release.currentDate} ${release.releaseType}`
+                const needTagWhileBranch = getNeedTagWhileBranch()
+                console.log('needTagWhileBranch------------', needTagWhileBranch)
+                let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newReleasePath}" ${release.nextRelase} ${release.currentDate} ${needTagWhileBranch}`
                 console.log('cmdStr======>' + cmdStr)
                 getTerminal().sendText(cmdStr)
             } catch (err) {
