@@ -11,6 +11,7 @@
 // https://www.cnblogs.com/virde/p/vscode-extension-input-and-output.html
 // https://www.cnblogs.com/virde/p/vscode-extension-input-and-output.html
 // http://nodejs.cn/api/fs.html#fs_fs_unlinksync_path
+// https://www.cnblogs.com/liuxianan/p/vscode-plugin-snippets-and-settings.html
 
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
@@ -24,9 +25,10 @@ const fs = require('fs')
 let mdTml = null
 // 下载的根url，注意必须要以/结尾
 // const rootUrl = 'https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/'
-let rootUrl = process.env.GIT_PLUGIN_URL
+// let rootUrl = process.env.GIT_PLUGIN_URL
+let rootUrl = vscode.workspace.getConfiguration().get('zerofinanceGit.gitScriptsUrlPreference')
 if (!rootUrl) {
-    rootUrl = 'http://gitlab.aeasycredit.net/dave.zhao/deployPlugin/raw/master/'
+    rootUrl = 'http://gitlab.aeasycredit.net/dave.zhao/deployPlugin/raw/master'
 }
 const newBranchFile = 'newBranch.sh'
 const newReleaseFile = 'release.sh'
@@ -100,7 +102,7 @@ async function newBranch() {
     let newBranch = await myPlugin.chooicingBranch(simpleGit(selectedItem.uri.fsPath))
     // vscode.window.showInformationMessage(newBranch);
     let newBranchFile = 'newBranch.sh'
-    let newBranchUrl = rootUrl + newBranchFile
+    let newBranchUrl = rootUrl + '/' + newBranchFile
 
     fs.exists(newBranchPath, async function(isExist) {
         // console.log("isExist----->"+isExist);
@@ -138,7 +140,7 @@ async function newRelease() {
         selectedRelease = await myPlugin.listAllRemoteReleaseVersions(git)
         release = myPlugin.chooicingTag(selectedRelease)
         // vscode.window.showInformationMessage(newBranch);
-        let newTagUrl = rootUrl + newTagFile
+        let newTagUrl = rootUrl + '/' + newTagFile
 
         fs.exists(newTagPath, async function(isExist) {
             // console.log("isExist----->"+isExist);
@@ -161,7 +163,7 @@ async function newRelease() {
         release = await myPlugin.chooicingRlease(releaseType, git)
         console.log('release----->', release)
         // vscode.window.showInformationMessage(newBranch);
-        let newReleaseUrl = rootUrl + newReleaseFile
+        let newReleaseUrl = rootUrl + '/' + newReleaseFile
 
         fs.exists(newReleasePath, async function(isExist) {
             // console.log("isExist----->"+isExist);
