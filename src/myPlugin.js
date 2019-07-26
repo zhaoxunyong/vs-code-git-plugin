@@ -238,6 +238,11 @@ async function chooicingRleaseType() {
     })
 }
 
+/**
+ * @description: List all of remote releae versions
+ * @param {json} versions 
+ * @Date: 2019-07-26 10:15:14
+ */
 async function listAllRemoteReleaseVersions(simpleGit) {
     let branch = await getAllReleaseVersion(simpleGit)
     let releaseBranchs = getAllRemoteReleaseBranchs(branch)
