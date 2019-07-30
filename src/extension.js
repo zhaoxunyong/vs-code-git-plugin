@@ -65,22 +65,12 @@ function getNeedTagWhileBranch() {
 function activate(context) {
     context.subscriptions.push(
         vscode.commands.registerCommand('extension.newBranch', function() {
-            /* vscode.window.showInformationMessage("They'll commit and push codes to remote branch automatically. Are you sure?", 'Yes', 'No').then(function(select) {
-                if (select === 'Yes') {
-                    newBranch()
-                }
-            }) */
             newBranch()
         })
     )
 
     context.subscriptions.push(
         vscode.commands.registerCommand('extension.newRelease', () => {
-            /* vscode.window.showInformationMessage("They'll commit and push codes to remote branch automatically. Are you sure?", 'Yes', 'No').then(function(select) {
-                if (select === 'Yes') {
-                    newRelease()
-                }
-            }) */
             newRelease()
         })
     )
@@ -118,29 +108,33 @@ function deactivate() {}
  */
 async function newBranch() {
     let selectedItem = await myPlugin.chooicingFolder()
-    let newBranch = await myPlugin.chooicingBranch(simpleGit(selectedItem.uri.fsPath))
+    const rootPath = selectedItem.uri.fsPath
+    let newBranch = await myPlugin.chooicingBranch(simpleGit(rootPath))
     // vscode.window.showInformationMessage(newBranch);
-    let newBranchFile = 'newBranch.sh'
-    let newBranchUrl = getRootUrl() + '/' + newBranchFile
 
-    fs.exists(newBranchPath, async function(isExist) {
-        // console.log("isExist----->"+isExist);
-        if (!isExist) {
-            vscode.window.showInformationMessage(`${newBranchFile} is downloading...`)
-            await downloadScripts(newBranchUrl, newBranchPath).catch(err => {
-                vscode.window.showErrorMessage(`Can't found ${newBranchUrl}`)
-            })
-            vscode.window.showInformationMessage(`${newBranchFile} downloaded in ${newBranchPath}.`)
-        }
-        // console.log('newBranchPath======>'+newBranchPath);
+    // The path of the root project, if exist, using it, otherwise downloaded from gitlab
+    let projectScriptPath = rootPath + '/' + newBranchFile
+    let scriptPath = newBranchPath
+    if (fs.existsSync(projectScriptPath)) {
+        scriptPath = projectScriptPath
+    } else {
+        let newBranchUrl = getRootUrl() + '/' + newBranchFile
+        await downloadScripts(newBranchUrl, newBranchPath).catch(err => {
+            vscode.window.showErrorMessage(`Can't found ${newBranchUrl}: ${err}`)
+            throw new Error(err)
+        })
+    }
+    if (fs.existsSync(scriptPath)) {
         try {
-            let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newBranchPath}" ${newBranch}`
+            let cmdStr = `cd "${rootPath}" && bash "${scriptPath}" ${newBranch}`
             // console.log('cmdStr======>'+cmdStr);
             getTerminal().sendText(cmdStr)
         } catch (err) {
             vscode.window.showErrorMessage(err)
         }
-    })
+    } else {
+        vscode.window.showErrorMessage(`Can't found ${newBranchFile}`)
+    }
 }
 
 /**
@@ -149,7 +143,8 @@ async function newBranch() {
  */
 async function newRelease() {
     let selectedItem = await myPlugin.chooicingFolder()
-    let git = simpleGit(selectedItem.uri.fsPath)
+    const rootPath = selectedItem.uri.fsPath
+    let git = simpleGit(rootPath)
 
     let releaseType = await myPlugin.chooicingRleaseType()
     let release = {}
@@ -159,40 +154,48 @@ async function newRelease() {
         selectedRelease = await myPlugin.listAllRemoteReleaseVersions(git)
         release = myPlugin.chooicingTag(selectedRelease)
         // vscode.window.showInformationMessage(newBranch);
-        let newTagUrl = getRootUrl() + '/' + newTagFile
 
-        fs.exists(newTagPath, async function(isExist) {
-            // console.log("isExist----->"+isExist);
-            if (!isExist) {
-                vscode.window.showInformationMessage(`${newTagFile} is downloading...`)
-                await downloadScripts(newTagUrl, newTagPath).catch(err => {
-                    vscode.window.showErrorMessage(`Can't found ${newTagUrl}`)
-                })
-                vscode.window.showInformationMessage(`${newTagPath} downloaded in ${newTagPath}.`)
-            }
+        let projectScriptPath = rootPath + '/' + newTagFile
+        let scriptPath = newTagPath
+
+        if (fs.existsSync(projectScriptPath)) {
+            scriptPath = projectScriptPath
+        } else {
+            let newTagUrl = getRootUrl() + '/' + newTagFile
+            await downloadScripts(newTagUrl, newTagPath).catch(err => {
+                vscode.window.showErrorMessage(`Can't found ${newTagUrl}: ${err}`)
+                throw new Error(err)
+            })
+        }
+        if (fs.existsSync(scriptPath)) {
             try {
-                let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newTagPath}" ${release.nextRelase} ${release.currentDate}`
+                let cmdStr = `cd "${rootPath}" && bash "${scriptPath}" ${release.nextRelase} ${release.currentDate}`
                 console.log('cmdStr======>' + cmdStr)
                 getTerminal().sendText(cmdStr)
             } catch (err) {
                 vscode.window.showErrorMessage(err)
             }
-        })
+        } else {
+            vscode.window.showErrorMessage(`Can't found ${newTagFile}`)
+        }
     } else {
         release = await myPlugin.chooicingRlease(releaseType, git)
         console.log('release----->', release)
         // vscode.window.showInformationMessage(newBranch);
-        let newReleaseUrl = getRootUrl() + '/' + newReleaseFile
 
-        fs.exists(newReleasePath, async function(isExist) {
-            // console.log("isExist----->"+isExist);
-            if (!isExist) {
-                vscode.window.showInformationMessage(`${newReleaseFile} is downloading...`)
-                await downloadScripts(newReleaseUrl, newReleasePath).catch(err => {
-                    vscode.window.showErrorMessage(`Can't found ${newReleaseUrl}`)
-                })
-                vscode.window.showInformationMessage(`${newReleaseFile} downloaded in ${newReleasePath}.`)
-            }
+        let projectScriptPath = rootPath + '/' + newReleaseFile
+        let scriptPath = newReleasePath
+
+        if (fs.existsSync(projectScriptPath)) {
+            scriptPath = projectScriptPath
+        } else {
+            let newReleaseUrl = getRootUrl() + '/' + newReleaseFile
+            await downloadScripts(newReleaseUrl, newReleasePath).catch(err => {
+                vscode.window.showErrorMessage(`Can't found ${newReleaseUrl}: ${err}`)
+                throw new Error(err)
+            })
+        }
+        if (fs.existsSync(scriptPath)) {
             try {
                 let needTagWhileBranch = getNeedTagWhileBranch()
                 console.log('needTagWhileBranch------------', needTagWhileBranch)
@@ -206,13 +209,15 @@ async function newRelease() {
                         }
                     })
                 }
-                let cmdStr = `cd "${selectedItem.uri.fsPath}" && bash "${newReleasePath}" ${release.nextRelase} ${release.currentDate} ${needTagWhileBranch}`
+                let cmdStr = `cd "${rootPath}" && bash "${scriptPath}" ${release.nextRelase} ${release.currentDate} ${needTagWhileBranch}`
                 console.log('cmdStr======>' + cmdStr)
                 getTerminal().sendText(cmdStr)
             } catch (err) {
                 vscode.window.showErrorMessage(err)
             }
-        })
+        } else {
+            vscode.window.showErrorMessage(`Can't found ${newReleaseFile}`)
+        }
     }
 }
 
