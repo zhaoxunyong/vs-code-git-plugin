@@ -240,7 +240,7 @@ async function chooicingRleaseType() {
 
 /**
  * @description: List all of remote releae versions
- * @param {json} versions 
+ * @param {json} versions
  * @Date: 2019-07-26 10:15:14
  */
 async function listAllRemoteReleaseVersions(simpleGit) {
@@ -284,9 +284,9 @@ function getMaxRemoteReleaseBranch(branch) {
     let currentBranch = ''
     let tempBranch = 0
     for (let version in branch.branches) {
-        if (version.startsWith('remotes/origin/') && (version.endsWith('.release') || version.endsWith('.hotfix'))) {
+        if (version.startsWith('remotes/origin/') && (version.indexOf('.release') != -1 || version.indexOf('.hotfix') != -1)) {
             const remoteBranchVersion = version.split('/')[2]
-            let temp = parseInt(remoteBranchVersion.replace(/\.|release|hotfix/gm, ''))
+            let temp = parseInt(remoteBranchVersion.replace(/\.(|release|hotfix).*/gm, ''))
             if (temp >= tempBranch) {
                 tempBranch = temp
                 currentBranch = remoteBranchVersion
