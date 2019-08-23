@@ -170,6 +170,11 @@ async function newRelease() {
         if (fs.existsSync(scriptPath)) {
             try {
                 let desc = await getDesc()
+                if (desc === '' || desc === undefined) {
+                    let err = 'The message for git description must not be empty!'
+                    vscode.window.showErrorMessage(err)
+                    throw new Error(err)
+                }
                 let cmdStr = `cd "${rootPath}" && bash "${scriptPath}" ${release.nextRelase} ${release.currentDate} "${desc}"`
                 console.log('cmdStr======>' + cmdStr)
                 getTerminal().sendText(cmdStr)
@@ -211,6 +216,11 @@ async function newRelease() {
                     })
                 }
                 let desc = await getDesc()
+                if (desc === '' || desc === undefined) {
+                    let err = 'The message for git description must not be empty!'
+                    vscode.window.showErrorMessage(err)
+                    throw new Error(err)
+                }
                 let cmdStr = `cd "${rootPath}" && bash "${scriptPath}" ${release.nextRelase} ${release.currentDate} ${needTagWhileBranch} "${desc}"`
                 console.log('cmdStr======>' + cmdStr)
                 getTerminal().sendText(cmdStr)
@@ -239,11 +249,11 @@ function getTerminal() {
 async function getDesc() {
     return await vscode.window.showInputBox({
         ignoreFocusOut: true,
-        placeHolder: 'Add a message for git',
-        prompt: 'Add a message for git',
+        placeHolder: 'Add a message for git description',
+        prompt: 'Add a message for git description',
         validateInput: function(text) {
             if (text == '') {
-                return 'Please add a message for git.'
+                return 'Please add a message for git description.'
             }
             return ''
         }
