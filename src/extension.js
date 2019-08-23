@@ -45,7 +45,7 @@ function getRootUrl() {
     // If you wanna get realtime config, must use "vscode.workspace.getConfiguration()"
     let rootUrl = vscode.workspace.getConfiguration().get('zerofinanceGit.gitScriptsUrlPreference')
     if (!rootUrl) {
-        rootUrl = 'http://gitlab.aeasycredit.net/dave.zhao/deployPlugin/raw/master'
+        rootUrl = 'http://gitlab.zerofinance.net/dave.zhao/deployPlugin/raw/master'
     }
     return rootUrl
 }
@@ -75,7 +75,7 @@ function activate(context) {
         })
     )
 
-    context.subscriptions.push(
+    /*context.subscriptions.push(
         vscode.commands.registerCommand('extension.clearCache', () => {
             try {
                 fs.unlinkSync(newBranchPath)
@@ -90,7 +90,7 @@ function activate(context) {
             } catch (error) {}
             vscode.window.showInformationMessage('Clear cache sussessfully!')
         })
-    )
+    )*/
 
     vscode.window.onDidCloseTerminal(terminal => {
         console.log(`onDidCloseTerminal, name: ${terminal.name}`)
@@ -169,7 +169,8 @@ async function newRelease() {
         }
         if (fs.existsSync(scriptPath)) {
             try {
-                let cmdStr = `cd "${rootPath}" && bash "${scriptPath}" ${release.nextRelase} ${release.currentDate}`
+                let desc = await getDesc()
+                let cmdStr = `cd "${rootPath}" && bash "${scriptPath}" ${release.nextRelase} ${release.currentDate} "${desc}"`
                 console.log('cmdStr======>' + cmdStr)
                 getTerminal().sendText(cmdStr)
             } catch (err) {
@@ -209,7 +210,8 @@ async function newRelease() {
                         }
                     })
                 }
-                let cmdStr = `cd "${rootPath}" && bash "${scriptPath}" ${release.nextRelase} ${release.currentDate} ${needTagWhileBranch}`
+                let desc = await getDesc()
+                let cmdStr = `cd "${rootPath}" && bash "${scriptPath}" ${release.nextRelase} ${release.currentDate} ${needTagWhileBranch} "${desc}"`
                 console.log('cmdStr======>' + cmdStr)
                 getTerminal().sendText(cmdStr)
             } catch (err) {
@@ -232,6 +234,20 @@ function getTerminal() {
     }
     mdTml.show(true)
     return mdTml
+}
+
+async function getDesc() {
+    return await vscode.window.showInputBox({
+        ignoreFocusOut: true,
+        placeHolder: 'Add a message for git',
+        prompt: 'Add a message for git',
+        validateInput: function(text) {
+            if (text == '') {
+                return 'Please add a message for git.'
+            }
+            return ''
+        }
+    })
 }
 
 /**
