@@ -257,6 +257,27 @@ async function listAllRemoteReleaseVersions(simpleGit) {
 }
 
 /**
+ * 如果version1>version2返回1，如果version<version2返回-1，否则返回0
+ */
+function compareVersion(version1, version2) {
+    if (version1 == undefined || version2 == undefined) {
+        return 0
+    }
+
+    let str1 = version1.split('.')
+    let str2 = version2.split('.')
+
+    for (let i = 0; i < str1.length || i < str2.length; ) {
+        let n1 = i < str1.length ? parseInt(str1[i]) : 0
+        let n2 = i < str2.length ? parseInt(str2[i]) : 0
+        if (n1 > n2) return 1
+        else if (n1 < n2) return -1
+        else i++
+    }
+    return 0
+}
+
+/**
  * @description: Get the current version from the remote branch
  * @param {Branch Object} branch
  * @returns the maximum version
@@ -264,10 +285,16 @@ async function listAllRemoteReleaseVersions(simpleGit) {
  */
 function getCurrentRemoteBranch(branch) {
     let currentBranch = ''
+    let version2 = '0.0.0'
     for (let version in branch.branches) {
         if (version.startsWith('remotes/origin/') && version.endsWith('.x')) {
             const remoteBranchVersion = version.split('/')[2]
-            currentBranch = remoteBranchVersion
+            let version1 = remoteBranchVersion
+            // 如果version1>version2返回1，如果version<version2返回-1，否则返回0
+            if (compareVersion(version1, version2) == 1) {
+                version2 = version1
+                currentBranch = remoteBranchVersion
+            }
         }
     }
     // console.log('currentBranch--->', currentBranch)
@@ -283,18 +310,25 @@ function getCurrentRemoteBranch(branch) {
 function getMaxRemoteReleaseBranch(branch) {
     let currentBranch = ''
     let tempBranch = 0
+    let version2 = '0.0.0'
     for (let version in branch.branches) {
-        if (version.startsWith('remotes/origin/') && (version.indexOf('.release') != -1 || version.indexOf('.hotfix') != -1)) {
+        if (version.startsWith('remotes/origin/') && (version.endsWith('.release') || version.endsWith('.hotfix'))) {
             const remoteBranchVersion = version.split('/')[2]
-            let temp = parseInt(remoteBranchVersion.replace(/\.|release|hotfix/gm, ''))
+            let version1 = remoteBranchVersion.replace(/\.release|\.hotfix/, '')
+            // 如果version1>version2返回1，如果version<version2返回-1，否则返回0
+            if (compareVersion(version1, version2) == 1) {
+                version2 = version1
+                currentBranch = remoteBranchVersion
+            }
+            /*let temp = parseInt(remoteBranchVersion.replace(/\.|release|hotfix/gm, ''))
             if (temp >= tempBranch) {
                 tempBranch = temp
                 currentBranch = remoteBranchVersion
-            }
+            }*/
         }
     }
-    // console.log('tempBranch--->', tempBranch)
-    // console.log('currentBranch--->', currentBranch)
+    console.log('tempBranch--->', tempBranch)
+    console.log('currentBranch--->', currentBranch)
     return currentBranch
 }
 

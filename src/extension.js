@@ -59,6 +59,11 @@ function getNeedTagWhileBranch() {
     return vscode.workspace.getConfiguration().get('zerofinanceGit.tagWhileBranchPreference')
 }
 
+function getWindowsExec() {
+    // If you wanna get realtime config, must use "vscode.workspace.getConfiguration()"
+    return vscode.workspace.getConfiguration().get('terminal.external.windowsExec')
+}
+
 /**
  * @param {vscode.ExtensionContext} context
  */
@@ -243,6 +248,13 @@ function getTerminal() {
         mdTml = vscode.window.createTerminal('zerofinance')
     }
     mdTml.show(true)
+    let isWin = process.platform === 'win32'
+    // In windows system, if not found "git-bash.exe", throw an exception
+    if (isWin && getWindowsExec().indexOf('git-bash.exe') == -1) {
+        const errMsg = 'Please set "git bash" for the terminal, which is in the Settings: Terminal->External: Windows Exec.'
+        vscode.window.showErrorMessage(errMsg)
+        throw new Error(errMsg)
+    }
     return mdTml
 }
 
