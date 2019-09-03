@@ -131,7 +131,13 @@ async function newBranch() {
     }
     if (fs.existsSync(scriptPath)) {
         try {
-            let cmdStr = `cd "${rootPath}" && bash "${scriptPath}" ${newBranch}`
+            let desc = await getDesc()
+            if (desc === '' || desc === undefined) {
+                let err = 'The message for git description must not be empty!'
+                vscode.window.showErrorMessage(err)
+                throw new Error(err)
+            }
+            let cmdStr = `cd "${rootPath}" && bash "${scriptPath}" ${newBranch} "${desc}"`
             // console.log('cmdStr======>'+cmdStr);
             getTerminal().sendText(cmdStr)
         } catch (err) {
