@@ -23,6 +23,9 @@ const axios = require('axios')
 const tmp = require('tmp')
 const fs = require('fs')
 
+const util = require('util')
+const exec = util.promisify(require('child_process').exec)
+
 let mdTml = null
 // const rootUrl = 'https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/'
 // let rootUrl = process.env.GIT_PLUGIN_URL
@@ -34,10 +37,12 @@ let mdTml = null
 const newBranchFile = 'newBranch.sh'
 const newReleaseFile = 'release.sh'
 const newTagFile = 'tag.sh'
+const gitCheckFile = 'gitCheck.sh'
 const tmpdir = tmp.tmpdir
 const newBranchPath = tmpdir + '/' + newBranchFile
 const newReleasePath = tmpdir + '/' + newReleaseFile
 const newTagPath = tmpdir + '/' + newTagFile
+const gitCheckPath = tmpdir + '/' + gitCheckFile
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 
@@ -107,6 +112,37 @@ exports.activate = activate
 // this method is called when your extension is deactivated
 function deactivate() {}
 
+async function gitCheck(rootPath) {
+    let projectScriptPath = rootPath + '/' + gitCheckFile
+    let scriptPath = gitCheckPath
+
+    if (fs.existsSync(projectScriptPath)) {
+        scriptPath = projectScriptPath
+    } else {
+        let gitCheckUrl = getRootUrl() + '/' + gitCheckFile
+        await downloadScripts(gitCheckUrl, gitCheckPath)
+        // await downloadScripts(gitCheckUrl, gitCheckPath).catch(err => {
+        //     vscode.window.showErrorMessage(`Can't found ${gitCheckUrl}: ${err}`)
+        //     throw new Error(err)
+        // })
+    }
+    if (fs.existsSync(scriptPath)) {
+        try {
+            await exec(`cd ${rootPath} && bash ${scriptPath}`)
+        } catch (err) {
+            const { stdout } = err
+            // console.log('stdout:', stdout)
+            // console.log('stderr:', stderr)
+            vscode.window.showErrorMessage(stdout)
+            throw new Error(stdout)
+            // vscode.window.showErrorMessage(stdout)
+        }
+    } else {
+        // Skipping check when gitCheck.sh is existing.
+        // vscode.window.showErrorMessage(`Can't found ${newTagFile}`)
+    }
+}
+
 /**
  * @description: Create branch
  * @Date: 2019-07-03 14:05:21
@@ -114,6 +150,7 @@ function deactivate() {}
 async function newBranch() {
     let selectedItem = await myPlugin.chooicingFolder()
     const rootPath = selectedItem.uri.fsPath
+    await gitCheck(rootPath)
     let newBranch = await myPlugin.chooicingBranch(simpleGit(rootPath))
     // vscode.window.showInformationMessage(newBranch);
 
@@ -155,6 +192,7 @@ async function newBranch() {
 async function newRelease() {
     let selectedItem = await myPlugin.chooicingFolder()
     const rootPath = selectedItem.uri.fsPath
+    await gitCheck(rootPath)
     let git = simpleGit(rootPath)
 
     let releaseType = await myPlugin.chooicingRleaseType()
