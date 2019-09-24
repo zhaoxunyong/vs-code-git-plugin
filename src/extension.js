@@ -27,6 +27,8 @@ const util = require('util')
 const exec = util.promisify(require('child_process').exec)
 
 let mdTml = null
+let myStatusBarItem = null
+
 // const rootUrl = 'https://raw.githubusercontent.com/zhaoxunyong/vs-code-git-plugin/master/'
 // let rootUrl = process.env.GIT_PLUGIN_URL
 // const config = vscode.workspace.getConfiguration()
@@ -113,8 +115,10 @@ exports.activate = activate
 function deactivate() {}
 
 async function gitCheck(rootPath) {
+    rootPath = rootPath.replace(/\\/gm, '/')
     let projectScriptPath = rootPath + '/' + gitCheckFile
     let scriptPath = gitCheckPath
+    scriptPath = scriptPath.replace(/\\/gm, '/')
 
     if (fs.existsSync(projectScriptPath)) {
         scriptPath = projectScriptPath
@@ -128,14 +132,34 @@ async function gitCheck(rootPath) {
     }
     if (fs.existsSync(scriptPath)) {
         try {
-            await exec(`cd ${rootPath} && bash ${scriptPath}`)
+            let isWin = process.platform === 'win32'
+            let cmd = ''
+            if (isWin) {
+                const rootFolder = rootPath.replace(/\/.+$/gm, '')
+                cmd = `cd ${rootPath} && ${rootFolder} && ${getWindowsExec()} ${scriptPath}`
+            } else {
+                cmd = `cd ${rootPath} && bash ${scriptPath}`
+            }
+            // await exec(cmd, { encoding: "UTF-8" })
+            if (myStatusBarItem == null) {
+                myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left)
+            }
+            // disposable = vscode.window.setStatusBarMessage('Checking git status, it may take a few seconds...')
+            myStatusBarItem.text = `Checking git status, it may take a few seconds...`
+            // myStatusBarItem.color = new vscode.ThemeColor('statusBar.background')
+            myStatusBarItem.color = 'red'
+            myStatusBarItem.show()
+            await exec(cmd)
         } catch (err) {
-            const { stdout } = err
+            const { stdout, stderr } = err
+            const msg = stdout ? stdout : stderr
             // console.log('stdout:', stdout)
             // console.log('stderr:', stderr)
-            vscode.window.showErrorMessage(stdout)
-            throw new Error(stdout)
-            // vscode.window.showErrorMessage(stdout)
+            vscode.window.showErrorMessage(msg)
+            throw new Error(msg)
+        } finally {
+            // disposable.dispose()
+            myStatusBarItem.hide()
         }
     } else {
         // Skipping check when gitCheck.sh is existing.
@@ -293,8 +317,8 @@ function getTerminal() {
     }
     mdTml.show(true)
     let isWin = process.platform === 'win32'
-    // In windows system, if not found "git-bash.exe", throw an exception
-    if (isWin && getWindowsExec().indexOf('git-bash.exe') == -1) {
+    // In windows system, if not found "bash.exe", throw an exception
+    if (isWin && getWindowsExec().indexOf('bash.exe') == -1) {
         const errMsg = 'Please set "git bash" for the terminal, which is in the Settings: Terminal->External: Windows Exec.'
         vscode.window.showErrorMessage(errMsg)
         throw new Error(errMsg)
