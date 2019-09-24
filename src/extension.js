@@ -71,18 +71,38 @@ function getWindowsExec() {
     return vscode.workspace.getConfiguration().get('terminal.external.windowsExec')
 }
 
+function clearCacheFile() {
+    try {
+        fs.unlinkSync(newBranchPath)
+    } catch (error) {}
+
+    try {
+        fs.unlinkSync(newReleasePath)
+    } catch (error) {}
+
+    try {
+        fs.unlinkSync(newTagPath)
+    } catch (error) {}
+
+    try {
+        fs.unlinkSync(gitCheckPath)
+    } catch (error) {}
+}
+
 /**
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
     context.subscriptions.push(
         vscode.commands.registerCommand('extension.newBranch', function() {
+            clearCacheFile()
             newBranch()
         })
     )
 
     context.subscriptions.push(
         vscode.commands.registerCommand('extension.newRelease', () => {
+            clearCacheFile()
             newRelease()
         })
     )
@@ -124,11 +144,15 @@ async function gitCheck(rootPath) {
         scriptPath = projectScriptPath
     } else {
         let gitCheckUrl = getRootUrl() + '/' + gitCheckFile
-        await downloadScripts(gitCheckUrl, gitCheckPath)
-        // await downloadScripts(gitCheckUrl, gitCheckPath).catch(err => {
-        //     vscode.window.showErrorMessage(`Can't found ${gitCheckUrl}: ${err}`)
-        //     throw new Error(err)
-        // })
+        try {
+            await downloadScripts(gitCheckUrl, gitCheckPath)
+            // await downloadScripts(gitCheckUrl, gitCheckPath).catch(err => {
+            //     vscode.window.showErrorMessage(`Can't found ${gitCheckUrl}: ${err}`)
+            //     throw new Error(err)
+            // })
+        } catch(err) {
+            console.warn("gitCheck.sh not found in remote git!")
+        }
     }
     if (fs.existsSync(scriptPath)) {
         try {
