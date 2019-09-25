@@ -19,7 +19,6 @@
 const vscode = require('vscode')
 const myPlugin = require('./myPlugin')
 const simpleGit = require('simple-git')
-const axios = require('axios')
 const tmp = require('tmp')
 const fs = require('fs')
 
@@ -129,10 +128,6 @@ function activate(context) {
         mdTml = null
     })
 }
-exports.activate = activate
-
-// this method is called when your extension is deactivated
-function deactivate() {}
 
 async function gitCheck(rootPath) {
     rootPath = rootPath.replace(/\\/gm, '/')
@@ -145,13 +140,13 @@ async function gitCheck(rootPath) {
     } else {
         let gitCheckUrl = getRootUrl() + '/' + gitCheckFile
         try {
-            await downloadScripts(gitCheckUrl, gitCheckPath)
+            await myPlugin.downloadScripts(gitCheckUrl, gitCheckPath)
             // await downloadScripts(gitCheckUrl, gitCheckPath).catch(err => {
             //     vscode.window.showErrorMessage(`Can't found ${gitCheckUrl}: ${err}`)
             //     throw new Error(err)
             // })
-        } catch(err) {
-            console.warn("gitCheck.sh not found in remote git!")
+        } catch (err) {
+            console.warn('gitCheck.sh not found in remote git!')
         }
     }
     if (fs.existsSync(scriptPath)) {
@@ -209,14 +204,14 @@ async function newBranch() {
         scriptPath = projectScriptPath
     } else {
         let newBranchUrl = getRootUrl() + '/' + newBranchFile
-        await downloadScripts(newBranchUrl, newBranchPath).catch(err => {
+        await myPlugin.downloadScripts(newBranchUrl, newBranchPath).catch(err => {
             vscode.window.showErrorMessage(`Can't found ${newBranchUrl}: ${err}`)
             throw new Error(err)
         })
     }
     if (fs.existsSync(scriptPath)) {
         try {
-            let desc = await getDesc()
+            let desc = await myPlugin.getDesc()
             if (desc === '' || desc === undefined) {
                 let err = 'The message for git description must not be empty!'
                 vscode.window.showErrorMessage(err)
@@ -259,14 +254,14 @@ async function newRelease() {
             scriptPath = projectScriptPath
         } else {
             let newTagUrl = getRootUrl() + '/' + newTagFile
-            await downloadScripts(newTagUrl, newTagPath).catch(err => {
+            await myPlugin.downloadScripts(newTagUrl, newTagPath).catch(err => {
                 vscode.window.showErrorMessage(`Can't found ${newTagUrl}: ${err}`)
                 throw new Error(err)
             })
         }
         if (fs.existsSync(scriptPath)) {
             try {
-                let desc = await getDesc()
+                let desc = await myPlugin.getDesc()
                 if (desc === '' || desc === undefined) {
                     let err = 'The message for git description must not be empty!'
                     vscode.window.showErrorMessage(err)
@@ -293,7 +288,7 @@ async function newRelease() {
             scriptPath = projectScriptPath
         } else {
             let newReleaseUrl = getRootUrl() + '/' + newReleaseFile
-            await downloadScripts(newReleaseUrl, newReleasePath).catch(err => {
+            await myPlugin.downloadScripts(newReleaseUrl, newReleasePath).catch(err => {
                 vscode.window.showErrorMessage(`Can't found ${newReleaseUrl}: ${err}`)
                 throw new Error(err)
             })
@@ -312,7 +307,7 @@ async function newRelease() {
                         }
                     })
                 }
-                let desc = await getDesc()
+                let desc = await myPlugin.getDesc()
                 if (desc === '' || desc === undefined) {
                     let err = 'The message for git description must not be empty!'
                     vscode.window.showErrorMessage(err)
@@ -350,52 +345,10 @@ function getTerminal() {
     return mdTml
 }
 
-async function getDesc() {
-    return await vscode.window.showInputBox({
-        ignoreFocusOut: true,
-        placeHolder: 'Add a message for git description',
-        prompt: 'Add a message for git description',
-        validateInput: function(text) {
-            if (text == '') {
-                return 'Please add a message for git description.'
-            }
-            return ''
-        }
-    })
-}
+exports.activate = activate
 
-/**
- * @description: Download the script from github
- * @param {string} github url
- * @Date: 2019-07-03 14:06:21
- */
-function downloadScripts(url, file) {
-    return new Promise((resolve, reject) => {
-        axios({
-            url: url,
-            method: 'GET',
-            responseType: 'blob', // important
-            headers: {
-                'Cache-Control': 'no-cache'
-            }
-        })
-            .then(response => {
-                fs.writeFile(file, response.data, err => {
-                    if (err) {
-                        throw err
-                    } else {
-                        resolve(file)
-                    }
-                })
-            })
-            .catch(function(error) {
-                // handle error
-                // console.log("error->", error);
-                reject(error)
-                // throw new Error(error);
-            })
-    })
-}
+// this method is called when your extension is deactivated
+function deactivate() {}
 
 /**
  * @description: Expose objects to the outside

@@ -1,5 +1,7 @@
 const vscode = require('vscode')
 const dateUtils = require('./dateUtils')
+const axios = require('axios')
+const fs = require('fs')
 
 /**
  * @description: Get branch object via simpleGit
@@ -349,6 +351,53 @@ function getAllRemoteReleaseBranchs(branch) {
     return releaseBranchs.reverse()
 }
 
+async function getDesc() {
+    return await vscode.window.showInputBox({
+        ignoreFocusOut: true,
+        placeHolder: 'Add a message for git description',
+        prompt: 'Add a message for git description',
+        validateInput: function(text) {
+            if (text == '') {
+                return 'Please add a message for git description.'
+            }
+            return ''
+        }
+    })
+}
+
+/**
+ * @description: Download the script from github
+ * @param {string} github url
+ * @Date: 2019-07-03 14:06:21
+ */
+function downloadScripts(url, file) {
+    return new Promise((resolve, reject) => {
+        axios({
+            url: url,
+            method: 'GET',
+            responseType: 'blob', // important
+            headers: {
+                'Cache-Control': 'no-cache'
+            }
+        })
+            .then(response => {
+                fs.writeFile(file, response.data, err => {
+                    if (err) {
+                        throw err
+                    } else {
+                        resolve(file)
+                    }
+                })
+            })
+            .catch(function(error) {
+                // handle error
+                // console.log("error->", error);
+                reject(error)
+                // throw new Error(error);
+            })
+    })
+}
+
 /**
  * @description: Expose objects to the outside
  * @Date: 2019-07-03 13:58:39
@@ -359,5 +408,7 @@ module.exports = {
     chooicingRlease,
     chooicingRleaseType,
     listAllRemoteReleaseVersions,
-    chooicingTag
+    chooicingTag,
+    downloadScripts,
+    getDesc
 }
