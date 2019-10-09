@@ -131,6 +131,12 @@ function activate(context) {
 
 async function gitCheck(rootPath) {
     rootPath = rootPath.replace(/\\/gm, '/')
+    const gitConfigPath = rootPath + '/.git'
+    if (!fs.existsSync(gitConfigPath)) {
+        const errMsg = `${rootPath} isn't a git project, make sure you are opening the root folder of project!`
+        vscode.window.showErrorMessage(errMsg)
+        throw new Error(errMsg)
+    }
     let projectScriptPath = rootPath + '/' + gitCheckFile
     let scriptPath = gitCheckPath
     scriptPath = scriptPath.replace(/\\/gm, '/')
