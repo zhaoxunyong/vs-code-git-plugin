@@ -9,7 +9,6 @@
 // https://dev.azure.com/it0815/_usersSettings/tokens
 // https://www.cnblogs.com/liuxianan/p/vscode-plugin-publish.html
 // https://www.cnblogs.com/virde/p/vscode-extension-input-and-output.html
-// https://www.cnblogs.com/virde/p/vscode-extension-input-and-output.html
 // http://nodejs.cn/api/fs.html#fs_fs_unlinksync_path
 // https://www.cnblogs.com/liuxianan/p/vscode-plugin-snippets-and-settings.html
 // https://code.visualstudio.com/api/references/contribution-points
@@ -47,7 +46,7 @@ const gitCheckPath = tmpdir + '/' + gitCheckFile
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 
-function getRootUrl() {
+function getRootUrl () {
     // If you wanna get realtime config, must use "vscode.workspace.getConfiguration()"
     let rootUrl = vscode.workspace.getConfiguration().get('zerofinanceGit.gitScriptsUrlPreference')
     if (!rootUrl) {
@@ -60,40 +59,35 @@ function getRootUrl() {
 //     return vscode.workspace.getConfiguration().get('zerofinanceGit.gitHomePathPreference')
 // }
 
-function getNeedTagWhileBranch() {
+function getNeedTagWhileBranch () {
     // If you wanna get realtime config, must use "vscode.workspace.getConfiguration()"
     return vscode.workspace.getConfiguration().get('zerofinanceGit.tagWhileBranchPreference')
 }
 
-function getWindowsExec() {
-    // If you wanna get realtime config, must use "vscode.workspace.getConfiguration()"
-    return vscode.workspace.getConfiguration().get('terminal.external.windowsExec')
-}
-
-function clearCacheFile() {
+function clearCacheFile () {
     try {
         fs.unlinkSync(newBranchPath)
-    } catch (error) {}
+    } catch (error) { }
 
     try {
         fs.unlinkSync(newReleasePath)
-    } catch (error) {}
+    } catch (error) { }
 
     try {
         fs.unlinkSync(newTagPath)
-    } catch (error) {}
+    } catch (error) { }
 
     try {
         fs.unlinkSync(gitCheckPath)
-    } catch (error) {}
+    } catch (error) { }
 }
 
 /**
  * @param {vscode.ExtensionContext} context
  */
-function activate(context) {
+function activate (context) {
     context.subscriptions.push(
-        vscode.commands.registerCommand('extension.newBranch', function() {
+        vscode.commands.registerCommand('extension.newBranch', function () {
             clearCacheFile()
             newBranch()
         })
@@ -129,7 +123,7 @@ function activate(context) {
     })
 }
 
-async function gitCheck(rootPath) {
+async function gitCheck (rootPath) {
     rootPath = rootPath.replace(/\\/gm, '/')
     const gitConfigPath = rootPath + '/.git'
     if (!fs.existsSync(gitConfigPath)) {
@@ -147,7 +141,7 @@ async function gitCheck(rootPath) {
         let gitCheckUrl = getRootUrl() + '/' + gitCheckFile
         try {
             await myPlugin.downloadScripts(gitCheckUrl, gitCheckPath)
-            // await downloadScripts(gitCheckUrl, gitCheckPath).catch(err => {
+            // await myPlugin.downloadScripts(gitCheckUrl, gitCheckPath).catch(err => {
             //     vscode.window.showErrorMessage(`Can't found ${gitCheckUrl}: ${err}`)
             //     throw new Error(err)
             // })
@@ -158,13 +152,12 @@ async function gitCheck(rootPath) {
     if (fs.existsSync(scriptPath)) {
         try {
             let isWin = process.platform === 'win32'
-            let cmd = ''
+            let cmd = `cd ${rootPath} && "${getBashPath()}" ${scriptPath}`
             if (isWin) {
                 const rootFolder = rootPath.replace(/\/.+$/gm, '')
-                cmd = `cd ${rootPath} && ${rootFolder} && ${getWindowsExec()} ${scriptPath}`
-            } else {
-                cmd = `cd ${rootPath} && bash ${scriptPath}`
+                cmd = `cd ${rootPath} && ${rootFolder} && "${getBashPath()}" ${scriptPath}`
             }
+            // let cmd = `cd ${rootPath} && "${getBashPath()}" ${scriptPath}`
             // await exec(cmd, { encoding: "UTF-8" })
             if (myStatusBarItem == null) {
                 myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left)
@@ -174,7 +167,12 @@ async function gitCheck(rootPath) {
             // myStatusBarItem.color = new vscode.ThemeColor('statusBar.background')
             myStatusBarItem.color = 'red'
             myStatusBarItem.show()
-            await exec(cmd)
+            const { stdout, stderr } = await exec(cmd)
+            if (stderr !== undefined && stderr !== '') {
+                vscode.window.showErrorMessage(stderr)
+                throw new Error(stderr)
+            }
+            // getTerminal().sendText(cmd)
         } catch (err) {
             const { stdout, stderr } = err
             const msg = stdout ? stdout : stderr
@@ -196,7 +194,7 @@ async function gitCheck(rootPath) {
  * @description: Create branch
  * @Date: 2019-07-03 14:05:21
  */
-async function newBranch() {
+async function newBranch () {
     let selectedItem = await myPlugin.chooicingFolder()
     const rootPath = selectedItem.uri.fsPath
     await gitCheck(rootPath)
@@ -223,7 +221,7 @@ async function newBranch() {
                 vscode.window.showErrorMessage(err)
                 throw new Error(err)
             }
-            let cmdStr = `cd "${rootPath}" && bash "${scriptPath}" ${newBranch} "${desc}"`
+            let cmdStr = `cd "${rootPath}" && "${getBashPath()}" "${scriptPath}" ${newBranch} "${desc}"`
             // console.log('cmdStr======>'+cmdStr);
             getTerminal().sendText(cmdStr)
         } catch (err) {
@@ -238,7 +236,7 @@ async function newBranch() {
  * @description: Create release
  * @Date: 2019-07-03 14:05:43
  */
-async function newRelease() {
+async function newRelease () {
     let selectedItem = await myPlugin.chooicingFolder()
     const rootPath = selectedItem.uri.fsPath
     await gitCheck(rootPath)
@@ -273,7 +271,7 @@ async function newRelease() {
                     vscode.window.showErrorMessage(err)
                     throw new Error(err)
                 }
-                let cmdStr = `cd "${rootPath}" && bash "${scriptPath}" ${release.nextRelase} ${release.currentDate} "${desc}"`
+                let cmdStr = `cd "${rootPath}" && "${getBashPath()}" "${scriptPath}" ${release.nextRelase} ${release.currentDate} "${desc}"`
                 console.log('cmdStr======>' + cmdStr)
                 getTerminal().sendText(cmdStr)
             } catch (err) {
@@ -305,7 +303,7 @@ async function newRelease() {
                 console.log('needTagWhileBranch------------', needTagWhileBranch)
                 if (needTagWhileBranch) {
                     let tooltips = `It will tag ${release.nextRelase}-${release.currentDate} for ${release.nextRelase} automatically. Are you sure to tag?`
-                    needTagWhileBranch = await vscode.window.showInformationMessage(tooltips, 'Yes', 'No').then(function(select) {
+                    needTagWhileBranch = await vscode.window.showInformationMessage(tooltips, 'Yes', 'No').then(function (select) {
                         if (select === 'No') {
                             return false
                         } else {
@@ -319,7 +317,7 @@ async function newRelease() {
                     vscode.window.showErrorMessage(err)
                     throw new Error(err)
                 }
-                let cmdStr = `cd "${rootPath}" && bash "${scriptPath}" ${release.nextRelase} ${release.currentDate} ${needTagWhileBranch} "${desc}"`
+                let cmdStr = `cd "${rootPath}" && "${getBashPath()}" "${scriptPath}" ${release.nextRelase} ${release.currentDate} ${needTagWhileBranch} "${desc}"`
                 console.log('cmdStr======>' + cmdStr)
                 getTerminal().sendText(cmdStr)
             } catch (err) {
@@ -336,25 +334,40 @@ async function newRelease() {
  * @returns terminal
  * @Date: 2019-07-03 14:05:53
  */
-function getTerminal() {
+function getTerminal () {
     if (mdTml == null) {
         mdTml = vscode.window.createTerminal('zerofinance')
     }
     mdTml.show(true)
-    let isWin = process.platform === 'win32'
-    // In windows system, if not found "bash.exe", throw an exception
-    if (isWin && getWindowsExec().indexOf('bash.exe') == -1) {
-        const errMsg = 'Please set "git bash" for the terminal, which is in the Settings: Terminal->External: Windows Exec.'
-        vscode.window.showErrorMessage(errMsg)
-        throw new Error(errMsg)
-    }
+
     return mdTml
+}
+
+function getBashPath () {
+    let gitBash = "bash"
+    // let isWin = process.platform === 'win32'
+    if (process.platform === 'win32') {
+        // If you wanna get realtime config, must use "vscode.workspace.getConfiguration()"
+        // let gitBash = vscode.workspace.getConfiguration().get('terminal.external.windowsExec')
+        gitBash = vscode.workspace.getConfiguration().get('terminal.integrated.shell.windows')
+        if (gitBash === null || gitBash.indexOf("bash.exe") == -1) {
+            // Searching "terminal.external.windowsExec"
+            // gitBash = vscode.workspace.getConfiguration().get('terminal.external.windowsExec')
+            // if (gitBash === null || gitBash.indexOf("bash.exe") == -1) {
+            const errMsg = "Please set \"git bash\" for the terminal at \"settings.json\": \"terminal.integrated.shell.windows\": \"YourGitPath\\\\bin\\\\bash.exe\"";
+            vscode.window.showErrorMessage(errMsg)
+            throw new Error(errMsg)
+            // }
+        }
+        gitBash = gitBash.replace(/\\/gm, '/')
+    }
+    return gitBash
 }
 
 exports.activate = activate
 
 // this method is called when your extension is deactivated
-function deactivate() {}
+function deactivate () { }
 
 /**
  * @description: Expose objects to the outside
