@@ -2,7 +2,7 @@
     "name": "zerofinance-git",
     "displayName": "zerofinance-git",
     "description": "zerofinance-git",
-    "version": "1.1.5",
+    "version": "1.1.20",
     "publisher": "zerofinance",
     "repository": "https://github.com/zhaoxunyong/vs-code-git-plugin",
     "engines": {
@@ -22,22 +22,17 @@
             "type": "object",
             "title": "zerofinance-git",
             "properties": {
-                "zerofinanceGit.gitHomePathPreference": {
-                    "type": "string",
-                    "default": "",
-                    "description": "Git Home Directory(Only for windows)"
-                },
                 "zerofinanceGit.gitScriptsUrlPreference": {
                     "type": "string",
-                    "default": "http://gitlab.aeasycredit.net/dave.zhao/deployPlugin/raw/master",
+                    "default": "http://gitlab.zerofinance.net/dave.zhao/deployPlugin/raw/master",
                     "description": "Gitlab url for download scripts"
                 },
                 "zerofinanceGit.tagWhileBranchPreference": {
-                    "type": "string",
-                    "default": "false",
+                    "type": "boolean",
+                    "default": false,
                     "enum": [
-                        "true",
-                        "false"
+                        true,
+                        false
                     ],
                     "description": "Whether or not to tag the release version automatically",
                     "enumDescriptions": [
@@ -49,6 +44,11 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Show tag in dropdown"
+                },
+                "zerofinanceGit.checkGitVersion": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Whether or not check git version"
                 }
             }
         },
@@ -60,12 +60,20 @@
             {
                 "command": "extension.newRelease",
                 "title": "Zerofinance Git: New Release"
-            },
-            {
-                "command": "extension.clearCache",
-                "title": "Zerofinance Git: Clear Cache"
             }
-        ]
+        ],
+        "menus": {
+            "editor/context": [
+                {
+                    "command": "extension.newBranch",
+                    "group": "navigation"
+                },
+                {
+                    "command": "extension.newRelease",
+                    "group": "navigation"
+                }
+            ]
+        }
     },
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install",
