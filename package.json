@@ -87,7 +87,7 @@
         "@types/mocha": "^2.2.42"
     },
     "dependencies": {
-        "axios": "^0.18.0",
+        "axios": "^0.21.1",
         "simple-git": "^1.107.0",
         "tmp": "0.0.33"
     }
