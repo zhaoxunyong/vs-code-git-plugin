@@ -10,6 +10,7 @@ npm install
 # vsce create-publisher zerofinance
 #vsce delete-publisher zerofinance
 #Generated token from "https://dev.azure.com/it0815/_usersSettings/tokens"
+#Just login once
 vsce login zerofinance
 #vsce package
 vsce publish

@@ -2,7 +2,7 @@
     "name": "zerofinance-git",
     "displayName": "zerofinance-git",
     "description": "zerofinance-git",
-    "version": "1.1.19",
+    "version": "1.1.20",
     "publisher": "zerofinance",
     "repository": "https://github.com/zhaoxunyong/vs-code-git-plugin",
     "engines": {
@@ -44,6 +44,11 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Show tag in dropdown"
+                },
+                "zerofinanceGit.checkGitVersion": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Whether or not check git version"
                 }
             }
         },

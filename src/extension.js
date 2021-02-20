@@ -149,16 +149,40 @@ async function gitCheck (rootPath) {
             console.warn('gitCheck.sh not found in remote git!')
         }
     }
+
+    // git version check
+    checkGitVersion = vscode.workspace.getConfiguration().get('zerofinanceGit.checkGitVersion')
+    if (checkGitVersion) {
+        try {
+            const { stdout, stderr } = await exec("git version")
+            console.log("1--->" + stdout)
+            // git version 2.29.2.windows.2
+            let versions = stdout.split(' ')
+            let [v1, v2, v3] = versions
+            let gitversion = v3.split('.')
+            // 2.29.2
+            let [g1, g2, g3] = gitversion
+            if (parseInt(g1) < 2 || (parseInt(g1) === 2 && parseInt(g2) < 29)) {
+                const msg = "Making sure git version >= 2.29.x. "
+                throw new Error(msg)
+            }
+        } catch (err) {
+            const { message } = err
+            let msg = message.toString() + "Please download from here: https://npm.taobao.org/mirrors/git-for-windows/v2.29.2.windows.2/Git-2.29.2.2-64-bit.exe"
+            vscode.window.showErrorMessage(msg)
+            throw new Error(msg)
+
+        }
+    }
+
     if (fs.existsSync(scriptPath)) {
         try {
-            let isWin = process.platform === 'win32'
             let cmd = `cd ${rootPath} && "${getBashPath()}" ${scriptPath}`
+            let isWin = process.platform === 'win32'
+            // "D:/Developer/Git/bin/bash.exe" -c "cd d:/Developer/workspace/blog && C:/Users/DAVE~1.ZHA/AppData/Local/Temp/gitCheck.sh"
             if (isWin) {
-                const rootFolder = rootPath.replace(/\/.+$/gm, '')
-                cmd = `cd ${rootPath} && ${rootFolder} && "${getBashPath()}" ${scriptPath}`
+                cmd = `"${getBashPath()}" -c "cd ${rootPath} && ${scriptPath}"`
             }
-            // let cmd = `cd ${rootPath} && "${getBashPath()}" ${scriptPath}`
-            // await exec(cmd, { encoding: "UTF-8" })
             if (myStatusBarItem == null) {
                 myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left)
             }
@@ -169,15 +193,12 @@ async function gitCheck (rootPath) {
             myStatusBarItem.show()
             const { stdout, stderr } = await exec(cmd)
             if (stderr !== undefined && stderr !== '') {
-                vscode.window.showErrorMessage(stderr)
                 throw new Error(stderr)
             }
             // getTerminal().sendText(cmd)
         } catch (err) {
-            const { stdout, stderr } = err
-            const msg = stdout ? stdout : stderr
-            // console.log('stdout:', stdout)
-            // console.log('stderr:', stderr)
+            const { stdout } = err
+            let msg = stdout.toString()
             vscode.window.showErrorMessage(msg)
             throw new Error(msg)
         } finally {
